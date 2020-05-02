@@ -1,4 +1,5 @@
 import wx
+import wx.adv
 import util
 import feeds
 import filters
@@ -16,12 +17,15 @@ INDEX_FEEDS = 2
 INDEX_IN = 3
 INDEX_OUT = 4
 
-class TaskBarIcon(wx.TaskBarIcon):
+
+class TaskBarIcon(wx.adv.TaskBarIcon):
+
     def __init__(self, controller):
         super(TaskBarIcon, self).__init__()
         self.controller = controller
         self.set_icon('icons/feed.png')
-        self.Bind(wx.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
+
     def CreatePopupMenu(self):
         menu = wx.Menu()
         util.menu_item(menu, 'Add Feed...', self.on_add_feed, 'icons/add.png')
@@ -37,9 +41,12 @@ class TaskBarIcon(wx.TaskBarIcon):
         menu.AppendSeparator()
         util.menu_item(menu, 'Exit', self.on_exit, 'icons/door_out.png')
         return menu
+
     def set_icon(self, path):
-        icon = wx.IconFromBitmap(wx.Bitmap(path))
+        # icon = wx.IconFromBitmap(wx.Bitmap(path))  # imcompatible?
+        icon = wx.Icon(path)
         self.SetIcon(icon, settings.APP_NAME)
+
     def on_exit(self, event):
         self.controller.close()
     def on_left_down(self, event):
