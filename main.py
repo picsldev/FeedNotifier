@@ -6,7 +6,8 @@ def init_path():
     while file and not os.path.isdir(file):
         file, ext = os.path.split(file)
     os.chdir(file)
-    
+
+
 def init_logging():
     import sys
     import logging
@@ -26,7 +27,8 @@ def init_logging():
         )
         console.setFormatter(formatter)
         logging.getLogger('').addHandler(console)
-        
+
+
 def main():
     init_path()
     init_logging()
@@ -36,13 +38,14 @@ def main():
     container, message = ipc.init()
     if not container:
         return
-    app = wx.PySimpleApp()#redirect=True, filename='log.txt')
-    wx.Log_SetActiveTarget(wx.LogStderr())
+    app = wx.App()  # redirect=True, filename='log.txt')
+    # wx.Log_SetActiveTarget(wx.LogStderr())
+    wx.Log.SetActiveTarget(wx.LogStderr())
     ctrl = controller.Controller()
     container.callback = ctrl.parse_args
     container(message)
     app.MainLoop()
-    
+
+
 if __name__ == '__main__':
     main()
-    
