@@ -5,7 +5,7 @@ import popups
 import view
 import updater
 import util
-import winsound
+# import winsound  # incompatible?
 import socket
 from settings import settings
 
