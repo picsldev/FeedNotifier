@@ -4,11 +4,11 @@ import re
 import time
 import base64
 import calendar
-import urllib2
-import urlparse
+import urllib.request, urllib.error, urllib.parse
+import urllib.parse
 import threading
 import feedparser
-from htmlentitydefs import name2codepoint
+from html.entities import name2codepoint
 from settings import settings
 
 def set_icon(window):
@@ -90,14 +90,14 @@ def is_valid_feed(data):
     return entries or title or link
     
 def insert_credentials(url, username, password):
-    parts = urlparse.urlsplit(url)
+    parts = urllib.parse.urlsplit(url)
     netloc = parts.netloc
     if '@' in netloc:
         netloc = netloc[netloc.index('@')+1:]
     netloc = '%s:%s@%s' % (username, password, netloc)
     parts = list(parts)
     parts[1] = netloc
-    return urlparse.urlunsplit(tuple(parts))
+    return urllib.parse.urlunsplit(tuple(parts))
     
 def encode_password(password):
     return base64.b64encode(password) if password else None
@@ -117,13 +117,13 @@ def get_proxy():
                 'http': url,
                 'https': url,
             }
-            proxy = urllib2.ProxyHandler(map)
+            proxy = urllib.request.ProxyHandler(map)
         else:
             # Windows-configured Proxy
-            proxy = urllib2.ProxyHandler()
+            proxy = urllib.request.ProxyHandler()
     else:
         # No Proxy
-        proxy = urllib2.ProxyHandler({})
+        proxy = urllib.request.ProxyHandler({})
     return proxy
     
 def find_themes():
@@ -228,7 +228,7 @@ def replace_entities1(text):
     entity = re.compile(r'&#(\d+);')
     def func(match):
         try:
-            return unichr(int(match.group(1)))
+            return chr(int(match.group(1)))
         except Exception:
             return match.group(0)
     return entity.sub(func, text)
@@ -237,7 +237,7 @@ def replace_entities2(text):
     entity = re.compile(r'&([a-zA-Z]+);')
     def func(match):
         try:
-            return unichr(name2codepoint[match.group(1)])
+            return chr(name2codepoint[match.group(1)])
         except Exception:
             return match.group(0)
     return entity.sub(func, text)

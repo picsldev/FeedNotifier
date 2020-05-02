@@ -66,7 +66,7 @@ def fancy_split(str, sep=","):
     return str
 
 def ensure_unicode(text):
-    if isinstance(text, unicode):
+    if isinstance(text, str):
         return text
     return text.decode("mbcs")
 
@@ -104,7 +104,7 @@ class Target:
         self.__dict__.update(kw)
         # If modules is a simple string, assume they meant list
         m = self.__dict__.get("modules")
-        if m and type(m) in types.StringTypes:
+        if m and type(m) in (str,):
             self.modules = [m]
     def get_dest_base(self):
         dest_base = getattr(self, "dest_base", None)
@@ -121,23 +121,22 @@ class Target:
                     getattr(self, "icon_resources", [])
         for r_id, r_filename in resources:
             if type(r_id) != type(0):
-                raise DistutilsOptionError, "Resource ID must be an integer"
+                raise DistutilsOptionError("Resource ID must be an integer")
             if not os.path.isfile(r_filename):
-                raise DistutilsOptionError, "Resource filename '%s' does not exist" % r_filename
+                raise DistutilsOptionError("Resource filename '%s' does not exist" % r_filename)
 
 def FixupTargets(targets, default_attribute):
     if not targets:
         return targets
     ret = []
     for target_def in targets:
-        if type(target_def) in types.StringTypes :
+        if type(target_def) in (str,) :
             # Create a default target object, with the string as the attribute
             target = Target(**{default_attribute: target_def})
         else:
             d = getattr(target_def, "__dict__", target_def)
-            if not d.has_key(default_attribute):
-                raise DistutilsOptionError, \
-                      "This target class requires an attribute '%s'" % default_attribute
+            if default_attribute not in d:
+                raise DistutilsOptionError("This target class requires an attribute '%s'" % default_attribute)
             target = Target(**d)
         target.validate()
         ret.append(target)
@@ -214,18 +213,14 @@ class py2exe(Command):
         self.ignores = fancy_split(self.ignores)
         self.bundle_files = int(self.bundle_files)
         if self.bundle_files < 1 or self.bundle_files > 3:
-            raise DistutilsOptionError, \
-                  "bundle-files must be 1, 2, or 3, not %s" % self.bundle_files
+            raise DistutilsOptionError("bundle-files must be 1, 2, or 3, not %s" % self.bundle_files)
         if is_win64 and self.bundle_files < 3:
-            raise DistutilsOptionError, \
-                  "bundle-files %d not yet supported on win64" % self.bundle_files
+            raise DistutilsOptionError("bundle-files %d not yet supported on win64" % self.bundle_files)
         if self.skip_archive:
             if self.compressed:
-                raise DistutilsOptionError, \
-                      "can't compress when skipping archive"
+                raise DistutilsOptionError("can't compress when skipping archive")
             if self.distribution.zipfile is None:
-                raise DistutilsOptionError, \
-                      "zipfile cannot be None when skipping archive"
+                raise DistutilsOptionError("zipfile cannot be None when skipping archive")
         # includes is stronger than excludes
         for m in self.includes:
             if m in self.excludes:
@@ -270,7 +265,7 @@ class py2exe(Command):
             mf.load_file(f.script)
 
         if self.typelibs:
-            print "*** generate typelib stubs ***"
+            print("*** generate typelib stubs ***")
             from distutils.dir_util import mkpath
             genpy_temp = os.path.join(self.temp_dir, "win32com", "gen_py")
             mkpath(genpy_temp)
@@ -278,60 +273,60 @@ class py2exe(Command):
                                                self.typelibs,
                                                verbose=self.verbose,
                                                dry_run=self.dry_run)
-            print "collected %d stubs from %d type libraries" \
-                  % (num_stubs, len(self.typelibs))
+            print(("collected %d stubs from %d type libraries" \
+                  % (num_stubs, len(self.typelibs))))
             mf.load_package("win32com.gen_py", genpy_temp)
             self.packages.append("win32com.gen_py")
 
         # monkey patching the compile builtin.
         # The idea is to include the filename in the error message
         orig_compile = compile
-        import __builtin__
+        import builtins
         def my_compile(source, filename, *args):
             try:
                 result = orig_compile(source, filename, *args)
-            except Exception, details:
-                raise DistutilsError, "compiling '%s' failed\n    %s: %s" % \
-                      (filename, details.__class__.__name__, details)
+            except Exception as details:
+                raise DistutilsError("compiling '%s' failed\n    %s: %s" % \
+                      (filename, details.__class__.__name__, details))
             return result
-        __builtin__.compile = my_compile
+        builtins.compile = my_compile
 
-        print "*** searching for required modules ***"
+        print("*** searching for required modules ***")
         self.find_needed_modules(mf, required_files, required_modules)
 
-        print "*** parsing results ***"
+        print("*** parsing results ***")
         py_files, extensions, builtins = self.parse_mf_results(mf)
 
         if self.xref:
             mf.create_xref()
 
-        print "*** finding dlls needed ***"
+        print("*** finding dlls needed ***")
         dlls = self.find_dlls(extensions)
         self.plat_finalize(mf.modules, py_files, extensions, dlls)
         dlls = [item for item in dlls
                 if os.path.basename(item).lower() not in self.dll_excludes]
         # should we filter self.other_depends in the same way?
 
-        print "*** create binaries ***"
+        print("*** create binaries ***")
         self.create_binaries(py_files, extensions, dlls)
 
         self.fix_badmodules(mf)
 
         if mf.any_missing():
-            print "The following modules appear to be missing"
-            print mf.any_missing()
+            print("The following modules appear to be missing")
+            print((mf.any_missing()))
 
         if self.other_depends:
-            print
-            print "*** binary dependencies ***"
-            print "Your executable(s) also depend on these dlls which are not included,"
-            print "you may or may not need to distribute them."
-            print
-            print "Make sure you have the license if you distribute any of them, and"
-            print "make sure you don't distribute files belonging to the operating system."
-            print
+            print()
+            print("*** binary dependencies ***")
+            print("Your executable(s) also depend on these dlls which are not included,")
+            print("you may or may not need to distribute them.")
+            print()
+            print("Make sure you have the license if you distribute any of them, and")
+            print("make sure you don't distribute files belonging to the operating system.")
+            print()
             for fnm in self.other_depends:
-                print "  ", os.path.basename(fnm), "-", fnm.strip()
+                print(("  ", os.path.basename(fnm), "-", fnm.strip()))
 
     def create_modulefinder(self):
         from modulefinder import ReplacePackage
@@ -426,7 +421,7 @@ class py2exe(Command):
         self.mkpath(self.lib_dir)
 
     def copy_extensions(self, extensions):
-        print "*** copy extensions ***"
+        print("*** copy extensions ***")
         # copy the extensions to the target directory
         for item in extensions:
             src = item.__file__
@@ -446,7 +441,7 @@ class py2exe(Command):
 
     def copy_dlls(self, dlls):
         # copy needed dlls where they belong.
-        print "*** copy dlls ***"
+        print("*** copy dlls ***")
         if self.bundle_files < 3:
             self.copy_dlls_bundle_files(dlls)
             return
@@ -511,7 +506,7 @@ class py2exe(Command):
         dist = self.distribution
 
         # byte compile the python modules into the target directory
-        print "*** byte compile python files ***"
+        print("*** byte compile python files ***")
         self.compiled_files = byte_compile(py_files,
                                            target_dir=self.collect_dir,
                                            optimize=self.optimize,
@@ -545,7 +540,7 @@ class py2exe(Command):
             self.lib_files.append(arcname)
 
         for target in self.distribution.isapi:
-            print "*** copy isapi support DLL ***"
+            print("*** copy isapi support DLL ***")
             # Locate the support DLL, and copy as "_script.dll", just like
             # isapi itself
             import isapi
@@ -558,7 +553,7 @@ class py2exe(Command):
             self.copy_file(src, dst, preserve_mode=0)
 
         if self.distribution.has_data_files():
-            print "*** copy data files ***"
+            print("*** copy data files ***")
             install_data = self.reinitialize_command('install_data')
             install_data.install_dir = self.dist_dir
             install_data.ensure_finalized()
@@ -606,7 +601,7 @@ class py2exe(Command):
                 arcfile = open(arcname, "wb")
 
                 if self.bundle_files < 2: # bundle pythonxy.dll also
-                    print "Adding %s to %s" % (python_dll, arcname)
+                    print(("Adding %s to %s" % (python_dll, arcname)))
                     arcfile.write("<pythondll>")
                     bytes = open(os.path.join(self.bundle_dir, python_dll), "rb").read()
                     arcfile.write(struct.pack("i", len(bytes)))
@@ -616,7 +611,7 @@ class py2exe(Command):
                     # prepend zlib.pyd also
                     zlib_file = imp.find_module("zlib")[0]
                     if zlib_file:
-                        print "Adding zlib%s.pyd to %s" % (is_debug_build and "_d" or "", arcname)
+                        print(("Adding zlib%s.pyd to %s" % (is_debug_build and "_d" or "", arcname)))
                         arcfile.write("<zlib.pyd>")
                         bytes = zlib_file.read()
                         arcfile.write(struct.pack("i", len(bytes)))
@@ -670,14 +665,12 @@ class py2exe(Command):
             paths.add(os.path.dirname(target.get_dest_base()))
 
         if len(paths) > 1:
-            raise DistutilsOptionError, \
-                  "all targets must use the same directory: %s" % \
-                  [p for p in paths]
+            raise DistutilsOptionError("all targets must use the same directory: %s" % \
+                  [p for p in paths])
         if paths:
             exe_dir = paths.pop() # the only element
             if os.path.isabs(exe_dir):
-                raise DistutilsOptionError, \
-                      "exe directory must be relative: %s" % exe_dir
+                raise DistutilsOptionError("exe directory must be relative: %s" % exe_dir)
             self.exe_dir = os.path.join(self.dist_dir, exe_dir)
             self.mkpath(self.exe_dir)
         else:
@@ -707,11 +700,11 @@ class py2exe(Command):
         # import the script with every side effect :)
         __import__(module_name)
         mod = sys.modules[module_name]
-        for name, klass in mod.__dict__.items():
+        for name, klass in list(mod.__dict__.items()):
             if hasattr(klass, "_svc_name_"):
                 break
         else:
-            raise RuntimeError, "No services in module"
+            raise RuntimeError("No services in module")
         deps = ()
         if hasattr(klass, "_svc_deps_"):
             deps = klass._svc_deps_
@@ -724,7 +717,7 @@ class py2exe(Command):
 
         cmdline_style = getattr(target, "cmdline_style", "py2exe")
         if cmdline_style not in ["py2exe", "pywin32", "custom"]:
-            raise RuntimeError, "cmdline_handler invalid"
+            raise RuntimeError("cmdline_handler invalid")
 
         vars = {"service_module_names" : target.modules,
                 "cmdline_style": cmdline_style,
@@ -820,8 +813,8 @@ class py2exe(Command):
         try:
             f = open(exe_path, "a+b")
             f.close()
-        except IOError, why:
-            print "WARNING: File %s could not be opened - %s" % (exe_path, why)
+        except IOError as why:
+            print(("WARNING: File %s could not be opened - %s" % (exe_path, why)))
 
         # We create a list of code objects, and write it as a marshaled
         # stream.  The framework code then just exec's these in order.
@@ -834,7 +827,7 @@ class py2exe(Command):
             code_objects.append(
                 compile("import zipextimporter; zipextimporter.install()",
                         "<install zipextimporter>", "exec"))
-        for var_name, var_val in vars.items():
+        for var_name, var_val in list(vars.items()):
             code_objects.append(
                     compile("%s=%r\n" % (var_name, var_val), var_name, "exec")
             )
@@ -861,7 +854,7 @@ class py2exe(Command):
         script_bytes = si + code_bytes + '\000\000'
         self.announce("add script resource, %d bytes" % len(script_bytes))
         if not self.dry_run:
-            add_resource(ensure_unicode(exe_path), script_bytes, u"PYTHONSCRIPT", 1, True)
+            add_resource(ensure_unicode(exe_path), script_bytes, "PYTHONSCRIPT", 1, True)
 
             # add the pythondll as resource, and delete in self.exe_dir
             if self.bundle_files < 2 and self.distribution.zipfile is None:
@@ -870,7 +863,7 @@ class py2exe(Command):
                 bytes = open(dll_path, "rb").read()
                 # image, bytes, lpName, lpType
 
-                print "Adding %s as resource to %s" % (python_dll, exe_path)
+                print(("Adding %s as resource to %s" % (python_dll, exe_path)))
                 add_resource(ensure_unicode(exe_path), bytes,
                              # for some reason, the 3. argument MUST BE UPPER CASE,
                              # otherwise the resource will not be found.
@@ -879,12 +872,12 @@ class py2exe(Command):
             if self.compressed and self.bundle_files < 3 and self.distribution.zipfile is None:
                 zlib_file = imp.find_module("zlib")[0]
                 if zlib_file:
-                    print "Adding zlib.pyd as resource to %s" % exe_path
+                    print(("Adding zlib.pyd as resource to %s" % exe_path))
                     zlib_bytes = zlib_file.read()
                     add_resource(ensure_unicode(exe_path), zlib_bytes,
                                  # for some reason, the 3. argument MUST BE UPPER CASE,
                                  # otherwise the resource will not be found.
-                                 u"ZLIB.PYD", 1, False)
+                                 "ZLIB.PYD", 1, False)
 
         # Handle all resources specified by the target
         bitmap_resources = getattr(target, "bitmap_resources", [])
@@ -907,14 +900,14 @@ class py2exe(Command):
 
         for res_type, res_id, data in getattr(target, "other_resources", []):
             if not self.dry_run:
-                if isinstance(res_type, basestring):
+                if isinstance(res_type, str):
                     res_type = ensure_unicode(res_type)
                 add_resource(ensure_unicode(exe_path), data, res_type, res_id, False)
 
         typelib = getattr(target, "typelib", None)
         if typelib is not None:
             data = open(typelib, "rb").read()
-            add_resource(ensure_unicode(exe_path), data, u"TYPELIB", 1, False)
+            add_resource(ensure_unicode(exe_path), data, "TYPELIB", 1, False)
 
         self.add_versioninfo(target, exe_path)
 
@@ -965,7 +958,7 @@ class py2exe(Command):
                           product_version = get("product_version") or version)
         try:
             bytes = version.resource_bytes()
-        except VersionError, detail:
+        except VersionError as detail:
             self.warn("Version Info will not be included:\n  %s" % detail)
             return
 
@@ -979,7 +972,7 @@ class py2exe(Command):
 
         new_winver = new_winver or self.distribution.metadata.name or "py2exe"
         if self.verbose:
-            print "setting sys.winver for '%s' to '%s'" % (dll_name, new_winver)
+            print(("setting sys.winver for '%s' to '%s'" % (dll_name, new_winver)))
         if self.dry_run:
             return
 
@@ -991,8 +984,8 @@ class py2exe(Command):
         try:
             f = open(dll_name, "a+b")
             f.close()
-        except IOError, why:
-            print "WARNING: File %s could not be opened - %s" % (dll_name, why)
+        except IOError as why:
+            print(("WARNING: File %s could not be opened - %s" % (dll_name, why)))
         # We aren't smart enough to update string resources in place, so we need
         # to persist other resources we care about.
         unicode_name = ensure_unicode(dll_name)
@@ -1089,14 +1082,14 @@ class py2exe(Command):
                 }
 
     def parse_mf_results(self, mf):
-        for name, imports in self.get_hidden_imports().items():
-            if name in mf.modules.keys():
+        for name, imports in list(self.get_hidden_imports().items()):
+            if name in list(mf.modules.keys()):
                 for mod in imports:
                     mf.import_hook(mod)
 
         tcl_src_dir = tcl_dst_dir = None
-        if "Tkinter" in mf.modules.keys():
-            import Tkinter
+        if "Tkinter" in list(mf.modules.keys()):
+            import tkinter
             import _tkinter
             tk = _tkinter.create()
             tcl_dir = tk.call("info", "library")
@@ -1115,7 +1108,7 @@ class py2exe(Command):
         extensions = []
         builtins = []
 
-        for item in mf.modules.values():
+        for item in list(mf.modules.values()):
             # There may be __main__ modules (from mf.run_script), but
             # we don't need them in the zipfile we build.
             if item.__name__ == "__main__":
@@ -1157,19 +1150,19 @@ class py2exe(Command):
         if sys.platform == "win32":
             # pythoncom and pywintypes are imported via LoadLibrary calls,
             # help py2exe to include the dlls:
-            if "pythoncom" in modules.keys():
+            if "pythoncom" in list(modules.keys()):
                 import pythoncom
                 dlls.add(pythoncom.__file__)
-            if "pywintypes" in modules.keys():
+            if "pywintypes" in list(modules.keys()):
                 import pywintypes
                 dlls.add(pywintypes.__file__)
             self.copy_w9xpopen(modules, dlls)
         else:
-            raise DistutilsError, "Platform %s not yet implemented" % sys.platform
+            raise DistutilsError("Platform %s not yet implemented" % sys.platform)
 
     def copy_w9xpopen(self, modules, dlls):
         # Using popen requires (on Win9X) the w9xpopen.exe helper executable.
-        if "os" in modules.keys() or "popen2" in modules.keys():
+        if "os" in list(modules.keys()) or "popen2" in list(modules.keys()):
             if is_debug_build:
                 fname = os.path.join(os.path.dirname(sys.executable), "w9xpopen_d.exe")
             else:
@@ -1193,7 +1186,7 @@ class py2exe(Command):
             
         # and what about dry_run?
         if self.verbose:
-            print "creating python loader for extension '%s' (%s -> %s)" % (item.__name__,item.__file__,fname)
+            print(("creating python loader for extension '%s' (%s -> %s)" % (item.__name__,item.__file__,fname)))
 
         source = LOADER % fname
         if not self.dry_run:
@@ -1270,7 +1263,7 @@ class py2exe(Command):
                                    "w9xpopen%s.exe" % (is_debug_build and "_d" or ""),
                                    "msvcr71%s.dll" % (is_debug_build and "d" or "")]
         else:
-            raise DistutilsError, "Platform %s not yet implemented" % sys.platform
+            raise DistutilsError("Platform %s not yet implemented" % sys.platform)
 
     def find_needed_modules(self, mf, files, modules):
         # feed Modulefinder with everything, and return it.
@@ -1401,7 +1394,7 @@ class FileSet:
                 self.add(arg)
 
     def __repr__(self):
-        return "<FileSet %s at %x>" % (self._dict.values(), id(self))
+        return "<FileSet %s at %x>" % (list(self._dict.values()), id(self))
 
     def add(self, fname):
         self._dict[fname.upper()] = fname
@@ -1410,10 +1403,10 @@ class FileSet:
         del self._dict[fname.upper()]
 
     def __contains__(self, fname):
-        return fname.upper() in self._dict.keys()
+        return fname.upper() in list(self._dict.keys())
 
     def __getitem__(self, index):
-        key = self._dict.keys()[index]
+        key = list(self._dict.keys())[index]
         return self._dict[key]
 
     def __len__(self):
@@ -1439,7 +1432,7 @@ def bin_depends(path, images, excluded_dlls):
                 dependents.add(image)
                 abs_image = os.path.abspath(image)
                 loadpath = os.path.dirname(abs_image) + ';' + path
-                for result in py2exe_util.depends(image, loadpath).items():
+                for result in list(py2exe_util.depends(image, loadpath).items()):
                     dll, uses_import_module = result
                     if os.path.basename(dll).lower() not in excluded_dlls:
                         if isSystemDLL(dll):
@@ -1499,12 +1492,12 @@ def isSystemDLL(pathname):
     import struct
     file = open(pathname, "rb")
     if file.read(2) != "MZ":
-        raise Exception, "Seems not to be an exe-file"
+        raise Exception("Seems not to be an exe-file")
     file.seek(0x3C)
     pe_ofs = struct.unpack("i", file.read(4))[0]
     file.seek(pe_ofs)
     if file.read(4) != "PE\000\000":
-        raise Exception, ("Seems not to be an exe-file", pathname)
+        raise Exception("Seems not to be an exe-file", pathname)
     file.read(20 + 28) # COFF File Header, offset of ImageBase in Optional Header
     imagebase = struct.unpack("I", file.read(4))[0]
     return not (imagebase < 0x70000000)
@@ -1523,7 +1516,7 @@ def byte_compile(py_files, optimize=0, force=0,
         from distutils.util import execute
         script_name = mktemp(".py")
         if verbose:
-            print "writing byte-compilation script '%s'" % script_name
+            print(("writing byte-compilation script '%s'" % script_name))
         if not dry_run:
             script = open(script_name, "w")
             script.write("""\
@@ -1534,14 +1527,14 @@ files = [
 
             for f in py_files:
                 script.write("Module(%s, %s, %s),\n" % \
-                (`f.__name__`, `f.__file__`, `f.__path__`))
+                (repr(f.__name__), repr(f.__file__), repr(f.__path__)))
             script.write("]\n")
             script.write("""
 byte_compile(files, optimize=%s, force=%s,
              target_dir=%s,
              verbose=%s, dry_run=0,
              direct=1)
-""" % (`optimize`, `force`, `target_dir`, `verbose`))
+""" % (repr(optimize), repr(force), repr(target_dir), repr(verbose)))
 
             script.close()
 
@@ -1576,7 +1569,7 @@ byte_compile(files, optimize=%s, force=%s,
 
             if force or newer(file.__file__, cfile):
                 if verbose:
-                    print "byte-compiling %s to %s" % (file.__file__, dfile)
+                    print(("byte-compiling %s to %s" % (file.__file__, dfile)))
                 if not dry_run:
                     mkpath(os.path.dirname(cfile))
                     suffix = os.path.splitext(file.__file__)[1]
@@ -1592,8 +1585,8 @@ byte_compile(files, optimize=%s, force=%s,
                               ("Don't know how to handle %r" % file.__file__)
             else:
                 if verbose:
-                    print "skipping byte-compilation of %s to %s" % \
-                          (file.__file__, dfile)
+                    print(("skipping byte-compilation of %s to %s" % \
+                          (file.__file__, dfile)))
     compiled_files = []
     for file in py_files:
         cfile = file.__name__.replace('.', '\\')
@@ -1655,7 +1648,7 @@ def collect_win32com_genpy(path, typelibs, verbose=0, dry_run=0):
             makepy.GenerateFromTypeLibSpec(tlb_info, bForDemand = False)
             # Now get the module, and build all sub-modules.
             mod = gencache.GetModuleForTypelib(*tlb_info)
-            for clsid, name in mod.CLSIDToPackageMap.items():
+            for clsid, name in list(mod.CLSIDToPackageMap.items()):
                 try:
                     gencache.GetModuleForCLSID(clsid)
                     num += 1
@@ -1672,7 +1665,7 @@ def collect_win32com_genpy(path, typelibs, verbose=0, dry_run=0):
 # utilities hacked from distutils.dir_util
 
 def _chmod(file):
-    os.chmod(file, 0777)
+    os.chmod(file, 0o777)
 
 # Helper for force_remove_tree()
 def _build_cmdtuple(path, cmdtuples):
@@ -1694,7 +1687,7 @@ def force_remove_tree (directory, verbose=0, dry_run=0):
     _path_created = distutils.dir_util._path_created
 
     if verbose:
-        print "removing '%s' (and everything under it)" % directory
+        print(("removing '%s' (and everything under it)" % directory))
     if dry_run:
         return
     cmdtuples = []
@@ -1704,9 +1697,9 @@ def force_remove_tree (directory, verbose=0, dry_run=0):
             cmd[0](cmd[1])
             # remove dir from cache if it's already there
             abspath = os.path.abspath(cmd[1])
-            if _path_created.has_key(abspath):
+            if abspath in _path_created:
                 del _path_created[abspath]
-        except (IOError, OSError), exc:
+        except (IOError, OSError) as exc:
             if verbose:
-                print grok_environment_error(
-                    exc, "error removing %s: " % directory)
+                print((grok_environment_error(
+                    exc, "error removing %s: " % directory)))

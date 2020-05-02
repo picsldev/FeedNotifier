@@ -70,7 +70,7 @@ if sys.platform == 'win32':
 else:
     import functools
     import socket
-    import SocketServer
+    import socketserver
     
     def init():
         container = CallbackContainer()
@@ -84,14 +84,14 @@ else:
         return None, message
         
     def server(host, port, callback_func):
-        class Handler(SocketServer.StreamRequestHandler):
+        class Handler(socketserver.StreamRequestHandler):
             def __init__(self, callback_func, *args, **kwargs):
                 self.callback_func = callback_func
-                SocketServer.StreamRequestHandler.__init__(self, *args, **kwargs)
+                socketserver.StreamRequestHandler.__init__(self, *args, **kwargs)
             def handle(self):
                 data = self.rfile.readline().strip()
                 self.callback_func(data)
-        server = SocketServer.TCPServer((host, port), functools.partial(Handler, callback_func))
+        server = socketserver.TCPServer((host, port), functools.partial(Handler, callback_func))
         util.start_thread(server.serve_forever)
         
     def client(host, port, message):

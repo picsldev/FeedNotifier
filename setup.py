@@ -63,7 +63,7 @@ def get_data_files():
             return False
         return tuple(file for file in files if not match(file))
     def tree(src):
-        return [(root, map(lambda f: os.path.join(root, f), filter_files(files))) for (root, dirs, files) in os.walk(os.path.normpath(src))]
+        return [(root, [os.path.join(root, f) for f in filter_files(files)]) for (root, dirs, files) in os.walk(os.path.normpath(src))]
     def include(src):
         result = tree(src)
         result = [('.', item[1]) for item in result]
@@ -111,7 +111,7 @@ def save_build_info():
     path = 'dist/revision.txt'
     with open(path, 'w') as file:
         file.write(str(revision))
-    print
-    print 'Saved build revision %d to %s' % (revision, path)
+    print()
+    print(('Saved build revision %d to %s' % (revision, path)))
     
 save_build_info()

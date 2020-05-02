@@ -82,13 +82,13 @@ class PopupManager(wx.EvtHandler):
                 continue
             frame = self.create_frame(item)
             self.cache[item] = frame
-        for item, frame in self.cache.items():
+        for item, frame in list(self.cache.items()):
             if item not in items:
                 frame.Close()
                 del self.cache[item]
     def clear_cache(self, keep_current_item=False):
         current_item = self.items[self.index]
-        for item, frame in self.cache.items():
+        for item, frame in list(self.cache.items()):
             if keep_current_item and item == current_item:
                 continue
             frame.Close()
@@ -96,7 +96,7 @@ class PopupManager(wx.EvtHandler):
     def show_frame(self, focus=False):
         current_item = self.items[self.index]
         current_item.read = True
-        for item, frame in self.cache.items():
+        for item, frame in list(self.cache.items()):
             if item == current_item:
                 if focus:
                     frame.Show()
@@ -107,7 +107,7 @@ class PopupManager(wx.EvtHandler):
                 frame.Update()
                 if settings.POPUP_TRANSPARENCY < 255:
                     frame.SetTransparent(settings.POPUP_TRANSPARENCY)
-        for item, frame in self.cache.items():
+        for item, frame in list(self.cache.items()):
             if item != current_item:
                 frame.Hide()
     def create_frame(self, item):

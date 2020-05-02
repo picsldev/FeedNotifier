@@ -1,7 +1,7 @@
 import wx
 import os
 import time
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import tempfile
 import util
 from settings import settings
@@ -56,7 +56,7 @@ class DownloadDialog(wx.Dialog):
 def get_remote_revision():
     file = None
     try:
-        file = urllib.urlopen(settings.REVISION_URL)
+        file = urllib.request.urlopen(settings.REVISION_URL)
         return int(file.read().strip())
     except Exception:
         return -1
@@ -67,7 +67,7 @@ def get_remote_revision():
 def download_installer(listener):
     fd, path = tempfile.mkstemp('.exe')
     os.close(fd)
-    path, headers = urllib.urlretrieve(settings.INSTALLER_URL, path, listener)
+    path, headers = urllib.request.urlretrieve(settings.INSTALLER_URL, path, listener)
     return path
     
 def should_check():

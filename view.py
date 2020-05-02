@@ -569,7 +569,7 @@ class Model(object):
         self.apply_settings()
         self.controller.save()
     def apply_settings(self):
-        for key, value in self.settings.items():
+        for key, value in list(self.settings.items()):
             setattr(settings, key, value)
     def apply_feeds(self):
         before = {}

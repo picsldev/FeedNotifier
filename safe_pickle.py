@@ -1,5 +1,5 @@
 import os
-import cPickle as pickle
+import pickle as pickle
 
 def load(path):
     tmp_path = '%s.tmp' % path

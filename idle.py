@@ -25,6 +25,6 @@ if __name__ == '__main__':
     import time
     while True:
         duration = get_idle_duration()
-        print 'User idle for %.2f seconds.' % duration
+        print(('User idle for %.2f seconds.' % duration))
         time.sleep(1)
         

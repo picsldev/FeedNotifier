@@ -114,7 +114,7 @@ tokens = [
     'AUTHOR',
     'CONTENT',
     'WORD',
-] + reserved.values()
+] + list(reserved.values())
 
 t_PLUS = r'\+'
 t_MINUS = r'\-'
@@ -218,6 +218,6 @@ def parse(text):
     
 if __name__ == '__main__':
     while True:
-        text = raw_input('> ')
-        print parse(text)
+        text = eval(input('> '))
+        print((parse(text)))
         

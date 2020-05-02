@@ -2,11 +2,11 @@ import os
 import time
 import calendar
 import uuid
-import urlparse
-import urllib2
+import urllib.parse
+import urllib.request, urllib.error, urllib.parse
 import filters
 import util
-import Queue
+import queue
 import logging
 import safe_pickle
 from settings import settings
@@ -64,12 +64,12 @@ class Feed(object):
             setattr(self, key, value)
     @property
     def favicon_url(self):
-        components = urlparse.urlsplit(self.link)
+        components = urllib.parse.urlsplit(self.link)
         scheme, domain = components[:2]
         return '%s://%s/favicon.ico' % (scheme, domain)
     @property
     def favicon_path(self):
-        components = urlparse.urlsplit(self.link)
+        components = urllib.parse.urlsplit(self.link)
         scheme, domain = components[:2]
         path = 'icons/cache/%s.ico' % domain
         return os.path.abspath(path)
@@ -85,7 +85,7 @@ class Feed(object):
             pass
         # try to download the favicon
         try:
-            opener = urllib2.build_opener(util.get_proxy())
+            opener = urllib.request.build_opener(util.get_proxy())
             f = opener.open(self.favicon_url)
             data = f.read()
             f.close()
@@ -197,8 +197,8 @@ class FeedManager(object):
         return any(feed.should_poll() for feed in self.feeds)
     def poll(self):
         now = int(time.time())
-        jobs = Queue.Queue()
-        results = Queue.Queue()
+        jobs = queue.Queue()
+        results = queue.Queue()
         feeds = [feed for feed in self.feeds if feed.should_poll()]
         for feed in feeds:
             jobs.put(feed)
@@ -216,7 +216,7 @@ class FeedManager(object):
         while True:
             try:
                 feed = jobs.get(False)
-            except Queue.Empty:
+            except queue.Empty:
                 break
             try:
                 items = feed.poll(now, self.filters)
@@ -255,7 +255,7 @@ class FeedManager(object):
             'color': None,
         }
         for feed in self.feeds:
-            for name, value in attributes.iteritems():
+            for name, value in list(attributes.items()):
                 if not hasattr(feed, name):
                     setattr(feed, name, value)
             if not hasattr(feed, 'id_list'):
