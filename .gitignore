@@ -4,3 +4,7 @@ installer
 feeds.dat
 log.txt
 settings.dat
+
+__pycache__
+
+*.bak
