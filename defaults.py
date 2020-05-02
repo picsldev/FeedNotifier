@@ -40,6 +40,7 @@ SOCKET_TIMEOUT = 15
 # Initial Setup
 DEFAULT_FEED_URLS = [
     'http://www.feednotifier.com/welcome.xml',
+    'https://www.pic-sl.com/unycop-beta.xml',
 ]
 
 # Proxy Settings
