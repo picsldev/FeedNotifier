@@ -6,9 +6,12 @@ log.txt
 settings.dat
 
 __pycache__
+.vscode
 
 parser.out
 parsetab.py
 
 *.bak
+
+Pipfile.lock
 
