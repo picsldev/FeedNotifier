@@ -2,6 +2,12 @@
 # This module should be kept compatible with Python 2.2, see PEP 291.
 
 
+import urllib.error
+import urllib.parse
+import urllib.request
+import tempfile
+from modulefinder import replacePackageMap
+from modulefinder import packagePathMap
 import dis
 import imp
 import marshal
@@ -37,22 +43,23 @@ HAVE_ARGUMENT = chr(dis.HAVE_ARGUMENT)
 # package, and it will be honored.
 
 # Note this is a mapping is lists of paths.
-#~ packagePathMap = {}
-from modulefinder import packagePathMap
+# ~ packagePathMap = {}
 
 # A Public interface
+
 def AddPackagePath(packagename, path):
     paths = packagePathMap.get(packagename, [])
     paths.append(path)
     packagePathMap[packagename] = paths
 
-#~ replacePackageMap = {}
-from modulefinder import replacePackageMap
+
+# ~ replacePackageMap = {}
 
 # This ReplacePackage mechanism allows modulefinder to work around the
 # way the _xmlplus package injects itself under the name "xml" into
 # sys.modules at runtime by calling ReplacePackage("_xmlplus", "xml")
 # before running ModuleFinder.
+
 
 def ReplacePackage(oldname, newname):
     replacePackageMap[oldname] = newname
@@ -81,6 +88,7 @@ class Module:
             s = s + ", %r" % (self.__path__,)
         s = s + ")"
         return s
+
 
 class ModuleFinder:
 
@@ -148,7 +156,7 @@ class ModuleFinder:
             self.msgout(4, "determine_parent -> None")
             return None
         pname = caller.__name__
-        if level >= 1: # relative import
+        if level >= 1:  # relative import
             if caller.__path__:
                 level -= 1
             if level == 0:
@@ -209,7 +217,8 @@ class ModuleFinder:
         m = q
         while tail:
             i = tail.find('.')
-            if i < 0: i = len(tail)
+            if i < 0:
+                i = len(tail)
             head, tail = tail[:i], tail[i+1:]
             mname = "%s.%s" % (m.__name__, head)
             m = self.import_module(head, mname, m)
@@ -284,7 +293,8 @@ class ModuleFinder:
         try:
             m = self.load_module(fqname, fp, pathname, stuff)
         finally:
-            if fp: fp.close()
+            if fp:
+                fp.close()
         if parent:
             setattr(parent, partname, m)
         self.msgout(3, "import_module ->", m)
@@ -349,7 +359,7 @@ class ModuleFinder:
                         self._add_badmodule(fullname, caller)
 
     def scan_opcodes(self, co,
-                     unpack = struct.unpack):
+                     unpack=struct.unpack):
         # Scan the code, and yield 'interesting' opcode combinations
         # Version for Python 2.4 and older
         code = co.co_code
@@ -373,7 +383,7 @@ class ModuleFinder:
                 code = code[1:]
 
     def scan_opcodes_25(self, co,
-                     unpack = struct.unpack):
+                        unpack=struct.unpack):
         # Scan the code, and yield 'interesting' opcode combinations
         # Python 2.5 version (has absolute and relative imports)
         code = co.co_code
@@ -390,11 +400,11 @@ class ModuleFinder:
             if code[:9:3] == LOAD_LOAD_AND_IMPORT:
                 oparg_1, oparg_2, oparg_3 = unpack('<xHxHxH', code[:9])
                 level = consts[oparg_1]
-                if level == -1: # normal import
+                if level == -1:  # normal import
                     yield "import", (consts[oparg_2], names[oparg_3])
-                elif level == 0: # absolute import
+                elif level == 0:  # absolute import
                     yield "absolute_import", (consts[oparg_2], names[oparg_3])
-                else: # relative import
+                else:  # relative import
                     yield "relative_import", (level, consts[oparg_2], names[oparg_3])
                 code = code[9:]
                 continue
@@ -422,8 +432,10 @@ class ModuleFinder:
                     if "*" in fromlist:
                         have_star = 1
                     fromlist = [f for f in fromlist if f != "*"]
-                if what == "absolute_import": level = 0
-                else: level = -1
+                if what == "absolute_import":
+                    level = 0
+                else:
+                    level = -1
                 self._safe_import_hook(name, m, fromlist, level=level)
                 if have_star:
                     # We've encountered an "import *". If it is a Python module,
@@ -450,7 +462,8 @@ class ModuleFinder:
                     self._safe_import_hook(name, m, fromlist, level=level)
                 else:
                     parent = self.determine_parent(m, level=level)
-                    self._safe_import_hook(parent.__name__, None, fromlist, level=0)
+                    self._safe_import_hook(
+                        parent.__name__, None, fromlist, level=0)
             else:
                 # We don't expect anything else from the generator.
                 raise RuntimeError(what)
@@ -599,11 +612,11 @@ class ModuleFinder:
 
         if self.debug and original_filename not in self.processed_paths:
             if new_filename != original_filename:
-                self.msgout(2, "co_filename %r changed to %r" \
-                                    % (original_filename,new_filename,))
+                self.msgout(2, "co_filename %r changed to %r"
+                            % (original_filename, new_filename,))
             else:
-                self.msgout(2, "co_filename %r remains unchanged" \
-                                    % (original_filename,))
+                self.msgout(2, "co_filename %r remains unchanged"
+                            % (original_filename,))
             self.processed_paths.append(original_filename)
 
         consts = list(co.co_consts)
@@ -612,10 +625,11 @@ class ModuleFinder:
                 consts[i] = self.replace_paths_in_code(consts[i])
 
         return types.CodeType(co.co_argcount, co.co_nlocals, co.co_stacksize,
-                         co.co_flags, co.co_code, tuple(consts), co.co_names,
-                         co.co_varnames, new_filename, co.co_name,
-                         co.co_firstlineno, co.co_lnotab,
-                         co.co_freevars, co.co_cellvars)
+                              co.co_flags, co.co_code, tuple(
+                                  consts), co.co_names,
+                              co.co_varnames, new_filename, co.co_name,
+                              co.co_firstlineno, co.co_lnotab,
+                              co.co_freevars, co.co_cellvars)
 
 
 def test():
@@ -684,12 +698,9 @@ if __name__ == '__main__':
         print("\n[interrupt]")
 
 
-
 # py2exe specific portion - this should be removed before inclusion in the
 # Python distribution
 
-import tempfile
-import urllib.request, urllib.parse, urllib.error
 
 try:
     set
@@ -701,6 +712,8 @@ del ModuleFinder
 
 # Much inspired by Toby Dickenson's code:
 # http://www.tarind.com/depgraph.html
+
+
 class ModuleFinder(Base):
     def __init__(self, *args, **kw):
         self._depgraph = {}
@@ -720,14 +733,15 @@ class ModuleFinder(Base):
         old_last_caller = self._last_caller
         try:
             self._last_caller = caller
-            return Base.import_hook(self,name,caller,fromlist,level)
+            return Base.import_hook(self, name, caller, fromlist, level)
         finally:
             self._last_caller = old_last_caller
 
-    def import_module(self,partnam,fqname,parent):
-        r = Base.import_module(self,partnam,fqname,parent)
+    def import_module(self, partnam, fqname, parent):
+        r = Base.import_module(self, partnam, fqname, parent)
         if r is not None and self._last_caller:
-            self._depgraph.setdefault(self._last_caller.__name__, set()).add(r.__name__)
+            self._depgraph.setdefault(
+                self._last_caller.__name__, set()).add(r.__name__)
         return r
 
     def load_module(self, fqname, fp, pathname, xxx_todo_changeme1):
@@ -752,30 +766,34 @@ class ModuleFinder(Base):
         fd, htmlfile = tempfile.mkstemp(".html")
         ofi = open(htmlfile, "w")
         os.close(fd)
-        print("<html><title>py2exe cross reference for %s</title><body>" % sys.argv[0], file=ofi)
+        print("<html><title>py2exe cross reference for %s</title><body>" %
+              sys.argv[0], file=ofi)
 
         print("<h1>py2exe cross reference for %s</h1>" % sys.argv[0], file=ofi)
 
         for name in names:
             if self._types[name] in (imp.PY_SOURCE, imp.PKG_DIRECTORY):
-                print('<a name="%s"><b><tt>%s</tt></b></a>' % (name, name), file=ofi)
+                print('<a name="%s"><b><tt>%s</tt></b></a>' %
+                      (name, name), file=ofi)
                 if name == "__main__":
                     for fname in self._scripts:
-                        path = urllib.request.pathname2url(os.path.abspath(fname))
-                        print('<a target="code" href="%s" type="text/plain"><tt>%s</tt></a> ' \
+                        path = urllib.request.pathname2url(
+                            os.path.abspath(fname))
+                        print('<a target="code" href="%s" type="text/plain"><tt>%s</tt></a> '
                               % (path, fname), file=ofi)
                     print('<br>imports:', file=ofi)
                 else:
-                    fname = urllib.request.pathname2url(self.modules[name].__file__)
-                    print('<a target="code" href="%s" type="text/plain"><tt>%s</tt></a><br>imports:' \
+                    fname = urllib.request.pathname2url(
+                        self.modules[name].__file__)
+                    print('<a target="code" href="%s" type="text/plain"><tt>%s</tt></a><br>imports:'
                           % (fname, self.modules[name].__file__), file=ofi)
             else:
                 fname = self.modules[name].__file__
                 if fname:
-                    print('<a name="%s"><b><tt>%s</tt></b></a> <tt>%s</tt><br>imports:' \
+                    print('<a name="%s"><b><tt>%s</tt></b></a> <tt>%s</tt><br>imports:'
                           % (name, name, fname), file=ofi)
                 else:
-                    print('<a name="%s"><b><tt>%s</tt></b></a> <i>%s</i><br>imports:' \
+                    print('<a name="%s"><b><tt>%s</tt></b></a> <i>%s</i><br>imports:'
                           % (name, name, TYPES[self._types[name]]), file=ofi)
 
             if name in depgraph:

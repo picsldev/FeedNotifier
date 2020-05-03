@@ -5,7 +5,8 @@ def load_revision():
             return int(file.read().strip())
     except Exception:
         return -1
-        
+
+
 # Popup Settings
 POPUP_DURATION = 5
 POPUP_AUTO_PLAY = True

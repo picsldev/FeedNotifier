@@ -4,12 +4,19 @@ import re
 import time
 import base64
 import calendar
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import urllib.parse
 import threading
-import feedparser
+try:
+    import feedparser
+except ModuleNotFoundError:
+    sys.exit("\n\tpip install feeparser\n")
+
 from html.entities import name2codepoint
 from settings import settings
+
 
 def set_icon(window):
     bundle = wx.IconBundle()
@@ -19,13 +26,15 @@ def set_icon(window):
     bundle.AddIcon(wx.Icon('icons/48.png', wx.BITMAP_TYPE_PNG))
     bundle.AddIcon(wx.Icon('icons/256.png', wx.BITMAP_TYPE_PNG))
     window.SetIcons(bundle)
-    
+
+
 def start_thread(func, *args):
     thread = threading.Thread(target=func, args=args)
     thread.setDaemon(True)
     thread.start()
     return thread
-    
+
+
 def scale_bitmap(bitmap, width, height, color):
     bw, bh = bitmap.GetWidth(), bitmap.GetHeight()
     if bw == width and bh == height:
@@ -34,61 +43,73 @@ def scale_bitmap(bitmap, width, height, color):
         width = bw
     if height < 0:
         height = bh
-    buffer = wx.EmptyBitmap(bw, bh)
+    # buffer = wx.EmptyBitmap(bw, bh)  # FIXME: deprecated
+    buffer = wx.Bitmap(bw, bh)
     dc = wx.MemoryDC(buffer)
     dc.SetBackground(wx.Brush(color))
     dc.Clear()
     dc.DrawBitmap(bitmap, 0, 0, True)
-    image = wx.ImageFromBitmap(buffer)
+    # image = wx.ImageFromBitmap(buffer)  # FIXME: deprecated
+    image = wx.Bitmap.ConvertToImage(buffer)
     image = image.Scale(width, height, wx.IMAGE_QUALITY_HIGH)
-    result = wx.BitmapFromImage(image)
+    # result = wx.BitmapFromImage(image)  # FIXME: deprecated
+    result = wx.Bitmap(image)
     return result
-    
+
+
 def menu_item(menu, label, func, icon=None, kind=wx.ITEM_NORMAL):
     item = wx.MenuItem(menu, -1, label, kind=kind)
     if func:
         menu.Bind(wx.EVT_MENU, func, id=item.GetId())
     if icon:
         item.SetBitmap(wx.Bitmap(icon))
-    menu.AppendItem(item)
+    # menu.AppendItem(item)  # FIXME: deprecated
+    menu.Append(item)
     return item
-    
+
+
 def select_choice(choice, data):
     for index in range(choice.GetCount()):
         if choice.GetClientData(index) == data:
             choice.Select(index)
             return
     choice.Select(wx.NOT_FOUND)
-    
+
+
 def get_top_window(window):
     result = None
     while window:
         result = window
         window = window.GetParent()
     return result
-    
+
+
 def get(obj, key, default):
     value = obj.get(key, None)
     return value or default
-    
+
+
 def abspath(path):
     path = os.path.abspath(path)
     path = 'file:///%s' % path.replace('\\', '/')
     return path
-    
+
+
 def parse(url, username=None, password=None, etag=None, modified=None):
     agent = settings.USER_AGENT
     handlers = [get_proxy()]
     if username and password:
         url = insert_credentials(url, username, password)
     return feedparser.parse(url, etag=etag, modified=modified, agent=agent, handlers=handlers)
-    
+
+
 def is_valid_feed(data):
     entries = get(data, 'entries', [])
     title = get(data.feed, 'title', '')
     link = get(data.feed, 'link', '')
     return entries or title or link
-    
+
+
 def insert_credentials(url, username, password):
     parts = urllib.parse.urlsplit(url)
     netloc = parts.netloc
@@ -98,16 +119,19 @@ def insert_credentials(url, username, password):
     parts = list(parts)
     parts[1] = netloc
     return urllib.parse.urlunsplit(tuple(parts))
-    
+
+
 def encode_password(password):
     return base64.b64encode(password) if password else None
-    
+
+
 def decode_password(password):
     try:
         return base64.b64decode(password) if password else None
     except Exception:
         return None
-        
+
+
 def get_proxy():
     if settings.USE_PROXY:
         url = decode_password(settings.PROXY_URL)
@@ -125,9 +149,10 @@ def get_proxy():
         # No Proxy
         proxy = urllib.request.ProxyHandler({})
     return proxy
-    
+
+
 def find_themes():
-    return ['default'] # TODO: more themes!
+    # return ['default']  # TODO: more themes! FIXME: unreachable code
     result = []
     names = os.listdir('themes')
     for name in names:
@@ -137,7 +162,8 @@ def find_themes():
         if os.path.isdir(path):
             result.append(name)
     return result
-    
+
+
 def guess_polling_interval(entries):
     if len(entries) < 2:
         return settings.DEFAULT_POLLING_INTERVAL
@@ -169,7 +195,8 @@ def guess_polling_interval(entries):
     else:
         interval = max(choice for choice in choices if choice <= desired)
     return interval
-    
+
+
 def time_since(t):
     t = int(t)
     now = int(time.time())
@@ -192,7 +219,8 @@ def time_since(t):
     if days == 1:
         return '1 day'
     return '%d days' % days
-    
+
+
 def split_time(seconds):
     if seconds < 60:
         return seconds, 0
@@ -204,7 +232,8 @@ def split_time(seconds):
     if days and hours % 24 == 0:
         return days, 3
     return hours, 2
-    
+
+
 def split_time_str(seconds):
     interval, units = split_time(seconds)
     strings = ['second', 'minute', 'hour', 'day']
@@ -212,7 +241,8 @@ def split_time_str(seconds):
     if interval != 1:
         string += 's'
     return '%d %s' % (interval, string)
-    
+
+
 def pretty_name(name):
     name = ' '.join(s.title() for s in name.split('_'))
     last = '0'
@@ -223,29 +253,35 @@ def pretty_name(name):
         result += c
         last = c
     return result
-    
+
+
 def replace_entities1(text):
     entity = re.compile(r'&#(\d+);')
+
     def func(match):
         try:
             return chr(int(match.group(1)))
         except Exception:
             return match.group(0)
     return entity.sub(func, text)
-    
+
+
 def replace_entities2(text):
     entity = re.compile(r'&([a-zA-Z]+);')
+
     def func(match):
         try:
             return chr(name2codepoint[match.group(1)])
         except Exception:
             return match.group(0)
     return entity.sub(func, text)
-    
+
+
 def remove_markup(text):
     html = re.compile(r'<[^>]+>')
     return html.sub(' ', text)
-    
+
+
 def format(text, max_length=400):
     previous = ''
     while text != previous:
@@ -260,4 +296,3 @@ def format(text, max_length=400):
         text.append('[...]')
         text = ' '.join(text)
     return text
-    

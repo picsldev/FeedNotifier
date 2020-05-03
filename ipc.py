@@ -14,9 +14,15 @@ class CallbackContainer(object):
 
 
 if sys.platform == 'win32':
-    import win32file
-    import win32pipe
-    import time
+    try:
+        import win32file
+        import win32pipe
+        import time
+    except ModuleNotFoundError:
+        sys.exit("\n\tpip install pywin32\n")
+    # import win32file
+    # import win32pipe
+    # import time
 
     def init():
         container = CallbackContainer()

@@ -11,6 +11,7 @@ COMMAND_LAST = 'http://last/'
 COMMAND_PLAY = 'http://play/'
 COMMAND_PAUSE = 'http://pause/'
 
+
 def position_window(window):
     index = settings.POPUP_DISPLAY
     if index >= wx.Display_GetCount():
@@ -33,17 +34,20 @@ def position_window(window):
         (0, 0): (x3, y3),
     }
     window.SetPosition(lookup[settings.POPUP_POSITION])
-    
+
+
 class Event(wx.PyEvent):
     def __init__(self, event_object, type):
         super(Event, self).__init__()
         self.SetEventType(type.typeId)
         self.SetEventObject(event_object)
-        
+
+
 EVT_LINK = wx.PyEventBinder(wx.NewEventType())
 EVT_POPUP_CLOSE = wx.PyEventBinder(wx.NewEventType())
 EVT_POPUP_ENTER = wx.PyEventBinder(wx.NewEventType())
 EVT_POPUP_LEAVE = wx.PyEventBinder(wx.NewEventType())
+
 
 class PopupManager(wx.EvtHandler):
     def __init__(self):
@@ -52,6 +56,7 @@ class PopupManager(wx.EvtHandler):
         self.auto = settings.POPUP_AUTO_PLAY
         self.cache = {}
         self.hover_count = 0
+
     def set_items(self, items, index=0, focus=False):
         self.items = list(items)
         self.index = index
@@ -59,6 +64,7 @@ class PopupManager(wx.EvtHandler):
         self.clear_cache(keep_current_item=True)
         self.update(focus)
         self.set_timer()
+
     def update(self, focus=False):
         item = self.items[self.index]
         if item in self.cache:
@@ -68,15 +74,17 @@ class PopupManager(wx.EvtHandler):
             self.update_cache(True)
             self.show_frame(focus)
             self.update_cache()
+
     def update_cache(self, current_only=False):
         indexes = set()
         indexes.add(self.index)
         if not current_only:
             indexes.add(self.index - 1)
             indexes.add(self.index + 1)
-            #indexes.add(0)
+            # indexes.add(0)
             #indexes.add(self.count - 1)
-        items = set(self.items[index] for index in indexes if index >= 0 and index < self.count)
+        items = set(self.items[index]
+                    for index in indexes if index >= 0 and index < self.count)
         for item in items:
             if item in self.cache:
                 continue
@@ -86,6 +94,7 @@ class PopupManager(wx.EvtHandler):
             if item not in items:
                 frame.Close()
                 del self.cache[item]
+
     def clear_cache(self, keep_current_item=False):
         current_item = self.items[self.index]
         for item, frame in list(self.cache.items()):
@@ -93,6 +102,7 @@ class PopupManager(wx.EvtHandler):
                 continue
             frame.Close()
             del self.cache[item]
+
     def show_frame(self, focus=False):
         current_item = self.items[self.index]
         current_item.read = True
@@ -110,8 +120,9 @@ class PopupManager(wx.EvtHandler):
         for item, frame in list(self.cache.items()):
             if item != current_item:
                 frame.Hide()
+
     def create_frame(self, item):
-        if True:#settings.POPUP_THEME == 'default':
+        if True:  # settings.POPUP_THEME == 'default':
             import theme_default
             context = self.create_context(item)
             frame = theme_default.Frame(item, context)
@@ -122,6 +133,7 @@ class PopupManager(wx.EvtHandler):
         if settings.POPUP_TRANSPARENCY < 255:
             frame.SetTransparent(0)
         return frame
+
     def create_context(self, item):
         context = {}
         count = str(self.count)
@@ -140,21 +152,26 @@ class PopupManager(wx.EvtHandler):
         context['COMMAND_PLAY'] = COMMAND_PLAY
         context['COMMAND_PAUSE'] = COMMAND_PAUSE
         return context
+
     def set_timer(self):
         if self.timer and self.timer.IsRunning():
             return
         duration = settings.POPUP_DURATION * 1000
         self.timer = wx.CallLater(duration, self.on_timer)
+
     def stop_timer(self):
         if self.timer and self.timer.IsRunning():
             self.timer.Stop()
             self.timer = None
+
     def on_enter(self, event):
         event.Skip()
         self.hover_count += 1
+
     def on_leave(self, event):
         event.Skip()
         self.hover_count -= 1
+
     def on_link(self, event):
         link = event.link
         # track the click
@@ -188,27 +205,33 @@ class PopupManager(wx.EvtHandler):
             self.auto = False
         else:
             webbrowser.open(link)
+
     def on_first(self):
         self.index = 0
         self.update(True)
+
     def on_last(self):
         self.index = self.count - 1
         self.update(True)
+
     def on_next(self, focus=True):
         if self.index < self.count - 1:
             self.index += 1
             self.update(focus)
         else:
             self.on_close()
+
     def on_previous(self):
         if self.index > 0:
             self.index -= 1
             self.update(True)
+
     def on_close(self):
         self.stop_timer()
         self.clear_cache()
         event = Event(self, EVT_POPUP_CLOSE)
         wx.PostEvent(self, event)
+
     def on_timer(self):
         self.timer = None
         set_timer = False
@@ -222,4 +245,3 @@ class PopupManager(wx.EvtHandler):
                 set_timer = True
         if set_timer:
             self.set_timer()
-            

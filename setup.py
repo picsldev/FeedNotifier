@@ -53,6 +53,8 @@ manifestVersion="1.0">
 sys.argv.append('py2exe')
 
 # Include these data files.
+
+
 def get_data_files():
     def filter_files(files):
         def match(file):
@@ -62,8 +64,10 @@ def get_data_files():
                     return True
             return False
         return tuple(file for file in files if not match(file))
+
     def tree(src):
         return [(root, [os.path.join(root, f) for f in filter_files(files)]) for (root, dirs, files) in os.walk(os.path.normpath(src))]
+
     def include(src):
         result = tree(src)
         result = [('.', item[1]) for item in result]
@@ -73,10 +77,11 @@ def get_data_files():
     data_files += tree('./sounds')
     data_files += tree('./Microsoft.VC90.CRT')
     return data_files
-    
+
+
 # Build the distribution.
 setup(
-    options = {"py2exe":{
+    options={"py2exe": {
         "compressed": 1,
         "optimize": 1,
         "bundle_files": 1,
@@ -92,20 +97,23 @@ setup(
             'SHFOLDER.dll',
         ],
     }},
-    windows = [{
+    windows=[{
         "script": "main.py",
         "dest_base": "notifier",
         "icon_resources": [(1, "icons/feed.ico")],
         "other_resources": [(24, 1, manifest)],
     }],
-    data_files = get_data_files(),
+    data_files=get_data_files(),
 )
 
 # Build Information
+
+
 def get_revision():
     import time
     return int(time.time())
-    
+
+
 def save_build_info():
     revision = get_revision()
     path = 'dist/revision.txt'
@@ -113,5 +121,6 @@ def save_build_info():
         file.write(str(revision))
     print()
     print(('Saved build revision %d to %s' % (revision, path)))
-    
+
+
 save_build_info()
