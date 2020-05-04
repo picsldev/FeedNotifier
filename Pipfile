@@ -15,10 +15,9 @@ flake8 = "*"
 pygame = "*"
 wxpython = "*"
 feedparser = "*"
-win32file = "*"
-win32pipe = "*"
 pywin32 = "*"
 ply = "*"
+py2exe = "*"
 
 [requires]
 python_version = "3.8"
