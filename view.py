@@ -19,14 +19,31 @@ INDEX_OUT = 4
 
 
 class TaskBarIcon(wx.adv.TaskBarIcon):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
 
     def __init__(self, controller):
+        """[summary]
+
+        Arguments:
+            controller {[type]} -- [description]
+        """
+
         super(TaskBarIcon, self).__init__()
         self.controller = controller
         self.set_icon('icons/feed.png')
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
 
     def CreatePopupMenu(self):
+        """[summary]
+
+        Returns:
+            [type] -- [description]
+        """
+
         menu = wx.Menu()
         util.menu_item(menu, 'Add Feed...', self.on_add_feed, 'icons/add.png')
         util.menu_item(menu, 'Preferences...',
@@ -48,35 +65,104 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         return menu
 
     def set_icon(self, path):
+        """[summary]
+
+        Arguments:
+            path {[type]} -- [description]
+        """
+
         # icon = wx.IconFromBitmap(wx.Bitmap(path))  # imcompatible?
         icon = wx.Icon(path)
         self.SetIcon(icon, settings.APP_NAME)
 
     def on_exit(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.close()
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.show_popup()
 
     def on_force_update(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.force_poll()
 
     def on_disable(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.disable()
 
     def on_enable(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.enable()
 
     def on_add_feed(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.add_feed()
 
     def on_settings(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.controller.edit_settings()
 
 
 class AddFeedDialog(wx.Dialog):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+
+    Returns:
+        [type] -- [description]
+    """
+
     @staticmethod
     def show_wizard(parent, url=''):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Keyword Arguments:
+            url {str} -- [description] (default: {''})
+
+        Returns:
+            [type] -- [description]
+        """
+
         while True:
             window = AddFeedDialog(parent, url)
             window.Center()
@@ -104,6 +190,15 @@ class AddFeedDialog(wx.Dialog):
             return None
 
     def __init__(self, parent, initial_url=''):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Keyword Arguments:
+            initial_url {str} -- [description] (default: {''})
+        """
+
         super(AddFeedDialog, self).__init__(parent, -1, 'Add RSS/Atom Feed')
         util.set_icon(self)
         # self.SetIcon(wx.IconFromBitmap(wx.Bitmap('icons/feed.png')))
@@ -114,19 +209,38 @@ class AddFeedDialog(wx.Dialog):
         self.validate()
 
     def get_initial_url(self):
+        """[summary]
+
+        Returns:
+            [type] -- [description]
+        """
+
         if self.initial_url:
             return self.initial_url
+
         if wx.TheClipboard.Open():
             object = wx.TextDataObject()
             success = wx.TheClipboard.GetData(object)
             wx.TheClipboard.Close()
+
             if success:
                 url = object.GetText()
+
                 if url.startswith('http'):
                     return url
+
         return ''
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         controls = self.create_controls(panel)
@@ -141,6 +255,15 @@ class AddFeedDialog(wx.Dialog):
         return panel
 
     def create_controls(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.GridBagSizer(8, 8)
         label = wx.StaticText(parent, -1, 'Feed URL')
         font = label.GetFont()
@@ -160,6 +283,15 @@ class AddFeedDialog(wx.Dialog):
         return sizer
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         back = wx.Button(parent, wx.ID_BACKWARD, '< Back')
         next = wx.Button(parent, wx.ID_FORWARD, 'Next >')
@@ -177,24 +309,48 @@ class AddFeedDialog(wx.Dialog):
         return sizer
 
     def validate(self):
+        """[summary]
+        """
+
         if self.url.GetValue():
             self.next.Enable()
         else:
             self.next.Disable()
 
     def on_text(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.validate()
 
     def on_next(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         url = self.url.GetValue()
         self.lock()
         util.start_thread(self.check_feed, url)
 
     def on_valid(self, result):
+        """[summary]
+
+        Arguments:
+            result {[type]} -- [description]
+        """
+
         self.result = result
         self.EndModal(wx.ID_OK)
 
     def on_invalid(self):
+        """[summary]
+        """
+
         dialog = wx.MessageDialog(
             self, 'The URL entered does not appear to be a valid RSS/Atom feed.', 'Invalid Feed', wx.OK | wx.ICON_ERROR)
         dialog.Center()
@@ -203,23 +359,38 @@ class AddFeedDialog(wx.Dialog):
         self.unlock()
 
     def on_password(self, url, username, password):
+        """[summary]
+
+        Arguments:
+            url {[type]} -- [description]
+            username {[type]} -- [description]
+            password {[type]} -- [description]
+        """
+
         dialog = PasswordDialog(self, username, password)
         dialog.Center()
         result = dialog.ShowModal()
         username = dialog.username.GetValue()
         password = dialog.password.GetValue()
         dialog.Destroy()
+
         if result == wx.ID_OK:
             util.start_thread(self.check_feed, url, username, password)
         else:
             self.unlock()
 
     def lock(self):
+        """[summary]
+        """
+
         self.url.Disable()
         self.next.Disable()
         self.status.SetLabel('Checking feed, please wait...')
 
     def unlock(self):
+        """[summary]
+        """
+
         self.url.Enable()
         self.next.Enable()
         self.status.SetLabel('')
@@ -227,6 +398,16 @@ class AddFeedDialog(wx.Dialog):
         self.url.SetFocus()
 
     def check_feed(self, url, username=None, password=None):
+        """[summary]
+
+        Arguments:
+            url {[type]} -- [description]
+
+        Keyword Arguments:
+            username {[type]} -- [description] (default: {None})
+            password {[type]} -- [description] (default: {None})
+        """
+
         d = util.parse(url, username, password)
         if not self:  # cancelled
             return
@@ -243,18 +424,45 @@ class AddFeedDialog(wx.Dialog):
 
 
 class PasswordDialog(wx.Dialog):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, username=None, password=None):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Keyword Arguments:
+            username {[type]} -- [description] (default: {None})
+            password {[type]} -- [description] (default: {None})
+        """
+
         super(PasswordDialog, self).__init__(parent, -1, 'Password Required')
         util.set_icon(self)
         panel = self.create_panel(self)
+
         if username:
             self.username.SetValue(username)
         if password:
             self.password.SetValue(password)
+
         self.Fit()
         self.validate()
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         controls = self.create_controls(panel)
@@ -267,6 +475,15 @@ class PasswordDialog(wx.Dialog):
         return panel
 
     def create_controls(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.GridBagSizer(8, 8)
         label = wx.StaticText(parent, -1, 'Username')
         username = wx.TextCtrl(parent, -1, '', size=(180, -1))
@@ -284,6 +501,15 @@ class PasswordDialog(wx.Dialog):
         return sizer
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         ok = wx.Button(parent, wx.ID_OK, 'OK')
         cancel = wx.Button(parent, wx.ID_CANCEL, 'Cancel')
         ok.SetDefault()
@@ -297,17 +523,42 @@ class PasswordDialog(wx.Dialog):
         return sizer
 
     def validate(self):
+        """[summary]
+        """
+
         if self.username.GetValue() and self.password.GetValue():
             self.ok.Enable()
         else:
             self.ok.Disable()
 
     def on_text(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.validate()
 
 
 class EditFeedDialog(wx.Dialog):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, feed, add=False):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            feed {[type]} -- [description]
+
+        Keyword Arguments:
+            add {bool} -- [description] (default: {False})
+        """
+
         title = 'Add RSS/Atom Feed' if add else 'Edit RSS/Atom Feed'
         super(EditFeedDialog, self).__init__(parent, -1, title)
         util.set_icon(self)
@@ -319,6 +570,15 @@ class EditFeedDialog(wx.Dialog):
         self.validate()
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         controls = self.create_controls(panel)
@@ -336,6 +596,15 @@ class EditFeedDialog(wx.Dialog):
         return panel
 
     def create_controls(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.GridBagSizer(8, 8)
         indexes = [0, 1, 3, 5, 7]
         labels = ['Feed URL', 'Feed Title', 'Feed Link',
@@ -400,6 +669,15 @@ class EditFeedDialog(wx.Dialog):
         return sizer
 
     def create_add_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         back = wx.Button(parent, wx.ID_BACKWARD, '< Back')
         next = wx.Button(parent, wx.ID_FORWARD, 'Finish')
@@ -417,6 +695,15 @@ class EditFeedDialog(wx.Dialog):
         return sizer
 
     def create_edit_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         next = wx.Button(parent, wx.ID_FORWARD, 'OK')
         cancel = wx.Button(parent, wx.ID_CANCEL, 'Cancel')
@@ -430,6 +717,9 @@ class EditFeedDialog(wx.Dialog):
         return sizer
 
     def validate(self):
+        """[summary]
+        """
+
         controls = [self.url, self.title, self.link]
         if all(control.GetValue() for control in controls):
             self.next.Enable()
@@ -437,6 +727,12 @@ class EditFeedDialog(wx.Dialog):
             self.next.Disable()
 
     def on_color(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         data = wx.ColourData()
         data.SetColour(self.color.GetBackgroundColour())
         dialog = wx.ColourDialog(self, data)
@@ -446,16 +742,40 @@ class EditFeedDialog(wx.Dialog):
             self.color._color = (color.Red(), color.Green(), color.Blue())
 
     def on_default(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.color.SetBackgroundColour(wx.Colour(*settings.POPUP_BORDER_COLOR))
         self.color._color = None
 
     def on_text(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.validate()
 
     def on_back(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.EndModal(wx.ID_BACKWARD)
 
     def on_next(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         url = self.url.GetValue()
         title = self.title.GetValue()
         link = self.link.GetValue()
@@ -477,7 +797,23 @@ class EditFeedDialog(wx.Dialog):
 
 
 class EditFilterDialog(wx.Dialog):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, model, filter=None):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            model {[type]} -- [description]
+
+        Keyword Arguments:
+            filter {[type]} -- [description] (default: {None})
+        """
+
         title = 'Edit Filter' if filter else 'Add Filter'
         style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         super(EditFilterDialog, self).__init__(parent, -1, title, style=style)
@@ -493,6 +829,15 @@ class EditFilterDialog(wx.Dialog):
         self.validate()
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         rules = self.create_rules(panel)
         options = self.create_options(panel)
@@ -504,6 +849,15 @@ class EditFilterDialog(wx.Dialog):
         return panel
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         ok = wx.Button(parent, wx.ID_OK, 'OK')
         cancel = wx.Button(parent, wx.ID_CANCEL, 'Cancel')
         sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -517,6 +871,15 @@ class EditFilterDialog(wx.Dialog):
         return sizer
 
     def create_rules(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Filter Rules')
         box = wx.StaticBoxSizer(box, wx.VERTICAL)
         code = wx.TextCtrl(parent, -1, self.filter.code,
@@ -536,6 +899,15 @@ class EditFilterDialog(wx.Dialog):
         return box
 
     def create_options(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         box = wx.StaticBox(parent, -1, 'Options')
         box = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -557,7 +929,18 @@ class EditFilterDialog(wx.Dialog):
             parent, -1, size=(150, 150), style=wx.LB_HSCROLL | wx.LB_EXTENDED)
 
         def cmp_title(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.title.lower(), b.title.lower())
+
         self.lookup = {}
         items = self.model.controller.manager.feeds
         for index, feed in enumerate(sorted(items, cmp=cmp_title)):
@@ -581,7 +964,14 @@ class EditFilterDialog(wx.Dialog):
         return sizer
 
     def get_selected_feeds(self):
+        """[summary]
+
+        Returns:
+            [type] -- [description]
+        """
+
         result = set()
+
         if self.selected_feeds.GetValue():
             for index in range(self.feeds.GetCount()):
                 if self.feeds.IsChecked(index):
@@ -589,6 +979,9 @@ class EditFilterDialog(wx.Dialog):
         return result
 
     def validate(self):
+        """[summary]
+        """
+
         feeds = self.get_selected_feeds()
         valid = True
         valid = valid and self.code.GetValue()
@@ -601,9 +994,21 @@ class EditFilterDialog(wx.Dialog):
         self.feeds.Enable(self.selected_feeds.GetValue())
 
     def on_event(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.validate()
 
     def on_ok(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         filter = self.filter
         filter.code = self.code.GetValue()
         filter.ignore_case = not self.match_case.GetValue()
@@ -613,11 +1018,26 @@ class EditFilterDialog(wx.Dialog):
 
 
 class Model(object):
+    """[summary]
+
+    Arguments:
+        object {[type]} -- [description]
+    """
+
     def __init__(self, controller):
+        """[summary]
+
+        Arguments:
+            controller {[type]} -- [description]
+        """
+
         self.controller = controller
         self.reset()
 
     def reset(self):
+        """[summary]
+        """
+
         self._feed_sort = -1
         self._filter_sort = -1
         feeds = self.controller.manager.feeds
@@ -629,6 +1049,15 @@ class Model(object):
         self.settings = {}
 
     def __getattr__(self, key):
+        """[summary]
+
+        Arguments:
+            key {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         if key != key.upper():
             return super(Model, self).__getattr__(key)
         if key in self.settings:
@@ -636,21 +1065,40 @@ class Model(object):
         return getattr(settings, key)
 
     def __setattr__(self, key, value):
+        """[summary]
+
+        Arguments:
+            key {[type]} -- [description]
+            value {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         if key != key.upper():
             return super(Model, self).__setattr__(key, value)
         self.settings[key] = value
 
     def apply(self):
+        """[summary]
+        """
+
         self.apply_filters()
         self.apply_feeds()
         self.apply_settings()
         self.controller.save()
 
     def apply_settings(self):
+        """[summary]
+        """
+
         for key, value in list(self.settings.items()):
             setattr(settings, key, value)
 
     def apply_feeds(self):
+        """[summary]
+        """
+
         before = {}
         after = {}
         controller = self.controller
@@ -675,6 +1123,9 @@ class Model(object):
             a.copy_from(b)
 
     def apply_filters(self):
+        """[summary]
+        """
+
         before = {}
         after = {}
         controller = self.controller
@@ -699,22 +1150,88 @@ class Model(object):
             a.copy_from(b)
 
     def sort_feeds(self, column):
+        """[summary]
+
+        Arguments:
+            column {[type]} -- [description]
+        """
+
         def cmp_enabled(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.enabled, b.enabled)
 
         def cmp_clicks(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(b.clicks, a.clicks)
 
         def cmp_item_count(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(b.item_count, a.item_count)
 
         def cmp_interval(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.interval, b.interval)
 
         def cmp_title(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.title.lower(), b.title.lower())
 
         def cmp_url(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.url.lower(), b.url.lower())
         funcs = {
             INDEX_ENABLED: cmp_enabled,
@@ -732,19 +1249,75 @@ class Model(object):
             self._feed_sort = column
 
     def sort_filters(self, column):
+        """[summary]
+
+        Arguments:
+            column {[type]} -- [description]
+        """
+
         def cmp_enabled(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.enabled, b.enabled)
 
         def cmp_rules(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(a.code, b.code)
 
         def cmp_feeds(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(len(a.feeds), len(b.feeds))
 
         def cmp_in(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(b.inputs, a.inputs)
 
         def cmp_out(a, b):
+            """[summary]
+
+            Arguments:
+                a {[type]} -- [description]
+                b {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             return cmp(b.outputs, a.outputs)
         funcs = {
             INDEX_ENABLED: cmp_enabled,
@@ -762,7 +1335,20 @@ class Model(object):
 
 
 class SettingsDialog(wx.Dialog):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, controller):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            controller {[type]} -- [description]
+        """
+
         title = '%s Preferences' % settings.APP_NAME
         style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         super(SettingsDialog, self).__init__(parent, -1, title, style=style)
@@ -774,6 +1360,15 @@ class SettingsDialog(wx.Dialog):
         self.SetMinSize(self.GetSize())
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         notebook = self.create_notebook(panel)
         line = wx.StaticLine(panel, -1)
@@ -786,6 +1381,15 @@ class SettingsDialog(wx.Dialog):
         return panel
 
     def create_notebook(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         images = wx.ImageList(48, 32)
         images.Add(util.scale_bitmap(
             wx.Bitmap('icons/feed32.png'), -1, -1, self.GetBackgroundColour()))
@@ -817,6 +1421,15 @@ class SettingsDialog(wx.Dialog):
         return notebook
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         ok = wx.Button(parent, wx.ID_OK, 'OK')
         cancel = wx.Button(parent, wx.ID_CANCEL, 'Cancel')
@@ -835,25 +1448,56 @@ class SettingsDialog(wx.Dialog):
         return sizer
 
     def apply(self):
+        """[summary]
+        """
+
         self.popups.update_model()
         self.options.update_model()
         self.model.apply()
         self.model.controller.poll()
 
     def on_change(self):
+        """[summary]
+        """
+
         self.apply_button.Enable()
 
     def on_ok(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.apply()
         event.Skip()
 
     def on_apply(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.apply()
         self.apply_button.Disable()
 
 
 class FeedsList(wx.ListCtrl):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         style = wx.LC_REPORT | wx.LC_VIRTUAL  # |wx.LC_HRULES|wx.LC_VRULES
         super(FeedsList, self).__init__(parent, -1, style=style)
         self.dialog = dialog
@@ -861,7 +1505,7 @@ class FeedsList(wx.ListCtrl):
         images = wx.ImageList(16, 16, True)
         # images.AddWithColourMask(wx.Bitmap('icons/unchecked.png'), wx.WHITE)  # FIXME: delete
         images.Add(wx.Bitmap('icons/unchecked.png'), wx.WHITE)
-        #images.AddWithColourMask(wx.Bitmap('icons/checked.png'), wx.WHITE)  # FIXME: delete
+        # images.AddWithColourMask(wx.Bitmap('icons/checked.png'), wx.WHITE)  # FIXME: delete
         images.Add(wx.Bitmap('icons/checked.png'), wx.WHITE)
         self.AssignImageList(images, wx.IMAGE_LIST_SMALL)
         self.InsertColumn(INDEX_ENABLED, 'On')
@@ -881,31 +1525,71 @@ class FeedsList(wx.ListCtrl):
         self.SetColumnWidth(INDEX_CLICKS, -2)
 
     def update(self):
+        """[summary]
+        """
+
         self.SetItemCount(len(self.model.feeds))
         self.Refresh()
 
     def on_col_click(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         column = event.GetColumn()
         self.model.sort_feeds(column)
         self.update()
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         index, flags = self.HitTest(event.GetPosition())
         if index >= 0 and (flags & wx.LIST_HITTEST_ONITEMICON):
             self.toggle(index)
         event.Skip()
 
     def toggle(self, index):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+        """
+
         feed = self.model.feeds[index]
         feed.enabled = not feed.enabled
         self.RefreshItem(index)
         self.dialog.on_change()
 
     def OnGetItemImage(self, index):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         feed = self.model.feeds[index]
         return 1 if feed.enabled else 0
 
     def OnGetItemText(self, index, column):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+            column {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         feed = self.model.feeds[index]
         if column == INDEX_URL:
             return feed.url
@@ -921,7 +1605,20 @@ class FeedsList(wx.ListCtrl):
 
 
 class FiltersList(wx.ListCtrl):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         style = wx.LC_REPORT | wx.LC_VIRTUAL  # |wx.LC_HRULES|wx.LC_VRULES
         super(FiltersList, self).__init__(parent, -1, style=style)
         self.dialog = dialog
@@ -947,31 +1644,71 @@ class FiltersList(wx.ListCtrl):
         self.SetColumnWidth(INDEX_OUT, 64)
 
     def update(self):
+        """[summary]
+        """
+
         self.SetItemCount(len(self.model.filters))
         self.Refresh()
 
     def on_col_click(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         column = event.GetColumn()
         self.model.sort_filters(column)
         self.update()
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         index, flags = self.HitTest(event.GetPosition())
         if index >= 0 and (flags & wx.LIST_HITTEST_ONITEMICON):
             self.toggle(index)
         event.Skip()
 
     def toggle(self, index):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+        """
+
         filter = self.model.filters[index]
         filter.enabled = not filter.enabled
         self.RefreshItem(index)
         self.dialog.on_change()
 
     def OnGetItemImage(self, index):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         filter = self.model.filters[index]
         return 1 if filter.enabled else 0
 
     def OnGetItemText(self, index, column):
+        """[summary]
+
+        Arguments:
+            index {[type]} -- [description]
+            column {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         filter = self.model.filters[index]
         if column == INDEX_RULES:
             return filter.code.replace('\n', ' ')
@@ -985,7 +1722,20 @@ class FiltersList(wx.ListCtrl):
 
 
 class FeedsPanel(wx.Panel):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         super(FeedsPanel, self).__init__(parent, -1)
         self.dialog = dialog
         self.model = dialog.model
@@ -997,6 +1747,15 @@ class FeedsPanel(wx.Panel):
         self.SetSizerAndFit(sizer)
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         list = FeedsList(panel, self.dialog)
         list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_selection)
@@ -1013,6 +1772,15 @@ class FeedsPanel(wx.Panel):
         return panel
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         new = wx.Button(parent, -1, 'Add...')
         #import_feeds = wx.Button(parent, -1, 'Import...')
         edit = wx.Button(parent, -1, 'Edit...')
@@ -1036,20 +1804,38 @@ class FeedsPanel(wx.Panel):
         return sizer
 
     def update(self):
+        """[summary]
+        """
+
         self.list.update()
         self.update_buttons()
         self.dialog.on_change()
 
     def on_selection(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         event.Skip()
         self.update_buttons()
 
     def update_buttons(self):
+        """[summary]
+        """
+
         count = self.list.GetSelectedItemCount()
         self.edit.Enable(count == 1)
         self.delete.Enable(count > 0)
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         index, flags = self.list.HitTest(event.GetPosition())
         if flags & wx.LIST_HITTEST_NOWHERE:
             self.edit.Disable()
@@ -1057,6 +1843,12 @@ class FeedsPanel(wx.Panel):
         event.Skip()
 
     def on_edit(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         count = self.list.GetSelectedItemCount()
         if count != 1:
             return
@@ -1071,14 +1863,28 @@ class FeedsPanel(wx.Panel):
             self.update()
 
     def on_new(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         feed = AddFeedDialog.show_wizard(self)
         if feed:
             self.model.feeds.append(feed)
             self.update()
 
     def on_delete(self, event):
-        dialog = wx.MessageDialog(self.dialog, 'Are you sure you want to delete the selected feed(s)?',
-                                  'Confirm Delete', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
+        dialog = wx.MessageDialog(self.dialog,
+                                  'Are you sure you want to delete the selected feed(s)?',
+                                  'Confirm Delete',
+                                  wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         result = dialog.ShowModal()
         dialog.Destroy()
         if result != wx.ID_YES:
@@ -1099,7 +1905,20 @@ class FeedsPanel(wx.Panel):
 
 
 class FiltersPanel(wx.Panel):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         super(FiltersPanel, self).__init__(parent, -1)
         self.dialog = dialog
         self.model = dialog.model
@@ -1111,6 +1930,15 @@ class FiltersPanel(wx.Panel):
         self.SetSizerAndFit(sizer)
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         list = FiltersList(panel, self.dialog)
         list.Bind(wx.EVT_LIST_ITEM_SELECTED, self.on_selection)
@@ -1127,6 +1955,15 @@ class FiltersPanel(wx.Panel):
         return panel
 
     def create_buttons(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         new = wx.Button(parent, -1, 'Add...')
         edit = wx.Button(parent, -1, 'Edit...')
         delete = wx.Button(parent, -1, 'Delete')
@@ -1147,20 +1984,38 @@ class FiltersPanel(wx.Panel):
         return sizer
 
     def update(self):
+        """[summary]
+        """
+
         self.list.update()
         self.update_buttons()
         self.dialog.on_change()
 
     def on_selection(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         event.Skip()
         self.update_buttons()
 
     def update_buttons(self):
+        """[summary]
+        """
+
         count = self.list.GetSelectedItemCount()
         self.edit.Enable(count == 1)
         self.delete.Enable(count > 0)
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         index, flags = self.list.HitTest(event.GetPosition())
         if flags & wx.LIST_HITTEST_NOWHERE:
             self.edit.Disable()
@@ -1168,11 +2023,18 @@ class FiltersPanel(wx.Panel):
         event.Skip()
 
     def on_edit(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         count = self.list.GetSelectedItemCount()
         if count != 1:
             return
         index = self.list.GetNextItem(-1,
-                                      wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED)
+                                      wx.LIST_NEXT_ALL,
+                                      wx.LIST_STATE_SELECTED)
         filter = self.model.filters[index]
         window = EditFilterDialog(self, self.model, filter)
         window.Center()
@@ -1182,6 +2044,12 @@ class FiltersPanel(wx.Panel):
             self.update()
 
     def on_new(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         window = EditFilterDialog(self, self.model)
         window.Center()
         result = window.ShowModal()
@@ -1192,8 +2060,16 @@ class FiltersPanel(wx.Panel):
             self.update()
 
     def on_delete(self, event):
-        dialog = wx.MessageDialog(self.dialog, 'Are you sure you want to delete the selected filter(s)?',
-                                  'Confirm Delete', wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
+        dialog = wx.MessageDialog(self.dialog,
+                                  'Are you sure you want to delete the selected filter(s)?',
+                                  'Confirm Delete',
+                                  wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
         result = dialog.ShowModal()
         dialog.Destroy()
         if result != wx.ID_YES:
@@ -1214,7 +2090,20 @@ class FiltersPanel(wx.Panel):
 
 
 class PopupsPanel(wx.Panel):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         super(PopupsPanel, self).__init__(parent, -1)
         self.dialog = dialog
         self.model = dialog.model
@@ -1227,6 +2116,15 @@ class PopupsPanel(wx.Panel):
         self.SetSizerAndFit(sizer)
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         behavior = self.create_behavior(panel)
@@ -1241,6 +2139,15 @@ class PopupsPanel(wx.Panel):
         return panel
 
     def create_appearance(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Appearance')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1298,6 +2205,15 @@ class PopupsPanel(wx.Panel):
         return sizer
 
     def create_behavior(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Behavior')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1335,6 +2251,15 @@ class PopupsPanel(wx.Panel):
         return sizer
 
     def create_content(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Content')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1363,6 +2288,9 @@ class PopupsPanel(wx.Panel):
         return sizer
 
     def update_controls(self):
+        """[summary]
+        """
+
         model = self.model
         self.width.SetValue(model.POPUP_WIDTH)
         self.transparency.SetValue(model.POPUP_TRANSPARENCY)
@@ -1380,6 +2308,9 @@ class PopupsPanel(wx.Panel):
         self.border_size.SetValue(model.POPUP_BORDER_SIZE)
 
     def update_model(self):
+        """[summary]
+        """
+
         model = self.model
         model.POPUP_WIDTH = self.width.GetValue()
         model.POPUP_TRANSPARENCY = self.transparency.GetValue()
@@ -1399,6 +2330,12 @@ class PopupsPanel(wx.Panel):
         model.POPUP_BORDER_COLOR = (color.Red(), color.Green(), color.Blue())
 
     def on_border_color(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         data = wx.ColourData()
         data.SetColour(self.border_color.GetBackgroundColour())
         dialog = wx.ColourDialog(self, data)
@@ -1408,12 +2345,31 @@ class PopupsPanel(wx.Panel):
             self.on_change(event)
 
     def on_change(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.dialog.on_change()
         event.Skip()
 
 
 class OptionsPanel(wx.Panel):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent, dialog):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            dialog {[type]} -- [description]
+        """
+
         super(OptionsPanel, self).__init__(parent, -1)
         self.dialog = dialog
         self.model = dialog.model
@@ -1426,6 +2382,15 @@ class OptionsPanel(wx.Panel):
         self.SetSizerAndFit(sizer)
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         sizer = wx.BoxSizer(wx.VERTICAL)
         general = self.create_general(panel)
@@ -1440,6 +2405,15 @@ class OptionsPanel(wx.Panel):
         return panel
 
     def create_general(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'General')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1473,6 +2447,15 @@ class OptionsPanel(wx.Panel):
         return sizer
 
     def create_caching(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Caching')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1510,6 +2493,15 @@ class OptionsPanel(wx.Panel):
         return sizer
 
     def create_proxy(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         box = wx.StaticBox(parent, -1, 'Proxy')
         sizer = wx.StaticBoxSizer(box, wx.VERTICAL)
         grid = wx.GridBagSizer(8, 8)
@@ -1532,6 +2524,9 @@ class OptionsPanel(wx.Panel):
         return sizer
 
     def update_controls(self):
+        """[summary]
+        """
+
         model = self.model
         self.idle.SetValue(model.DISABLE_WHEN_IDLE)
         self.timeout.SetValue(model.USER_IDLE_TIMEOUT)
@@ -1543,6 +2538,9 @@ class OptionsPanel(wx.Panel):
         self.enable_controls()
 
     def update_model(self):
+        """[summary]
+        """
+
         model = self.model
         model.DISABLE_WHEN_IDLE = self.idle.GetValue()
         model.USER_IDLE_TIMEOUT = self.timeout.GetValue()
@@ -1553,29 +2551,68 @@ class OptionsPanel(wx.Panel):
         model.PROXY_URL = util.encode_password(self.proxy_url.GetValue())
 
     def enable_controls(self):
+        """[summary]
+        """
+
         self.timeout.Enable(self.idle.GetValue())
         self.proxy_url.Enable(self.use_proxy.GetValue())
 
     def on_change(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.enable_controls()
         self.dialog.on_change()
         event.Skip()
 
     def on_clear_item(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.model.controller.manager.clear_item_history()
         self.clear_item.Disable()
 
     def on_clear_feed(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.model.controller.manager.clear_feed_cache()
         self.clear_feed.Disable()
 
     def on_check_now(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.check_now.Disable()
         self.model.controller.check_for_updates()
 
 
 class AboutPanel(wx.Panel):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+        """
+
         super(AboutPanel, self).__init__(parent, -1)
         panel = self.create_panel(self)
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -1584,47 +2621,45 @@ class AboutPanel(wx.Panel):
         sizer.Add(panel, 1, wx.EXPAND | wx.ALL, 8)
         credits = '''
         %s %s :: Copyright (c) 2009-2013, Michael Fogleman
-        
+
         16x16px icons in this application are from the Silk Icon set provided by Mark James under a Creative Commons Attribution 2.5 License. http://www.famfamfam.com/lab/icons/silk/
-        
+
         Third-party components of this software include the following:
-        
+
         * Python 2.6 - http://www.python.org/
         * wxPython 2.8.10 - http://www.wxpython.org/
         * Universal Feed Parser - http://www.feedparser.org/
         * PLY 3.3 - http://www.dabeaz.com/ply/
         * py2exe 0.6.9 - http://www.py2exe.org/
         * Inno Setup - http://www.jrsoftware.org/isinfo.php
-        
-        
+
         Universal Feed Parser, a component of this software, requires that the following text be included in the distribution of this application:
-        
+
         Copyright (c) 2002-2005, Mark Pilgrim
         All rights reserved.
-        
+
         Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-        
+
         * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-        
+
         * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-        
+
         THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-        
-        
+
         PLY 3.3 (Python Lex-Yacc), a component of this software, requires that the following text be included in the distribution of this application:
 
         Copyright (C) 2001-2009,
         David M. Beazley (Dabeaz LLC)
         All rights reserved.
-        
+
         Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-        
+
         * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-        
+
         * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-        
+
         * Neither the name of the David Beazley or Dabeaz LLC may be used to endorse or promote products derived from this software without specific prior written permission.
-        
+
         THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         ''' % (settings.APP_NAME, settings.APP_VERSION)
         credits = '\n'.join(line.strip()
@@ -1636,6 +2671,15 @@ class AboutPanel(wx.Panel):
         self.SetSizerAndFit(sizer)
 
     def create_panel(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1, style=wx.BORDER_SUNKEN)
         panel.SetBackgroundColour(wx.WHITE)
         sizer = wx.BoxSizer(wx.VERTICAL)
