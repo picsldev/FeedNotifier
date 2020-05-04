@@ -5,13 +5,22 @@ import popups
 import view
 import updater
 import util
-# import winsound  # incompatible?
+# import winsound  # FIXME: incompatible?
 import socket
 from settings import settings
 
 
 class Controller(object):
+    """[summary]
+
+    Arguments:
+        object {[type]} -- [description]
+    """
+
     def __init__(self):
+        """[summary]
+        """
+
         socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
         self.icon = view.TaskBarIcon(self)
         self.manager = feeds.FeedManager()
@@ -24,6 +33,9 @@ class Controller(object):
         self.on_check_for_updates()
 
     def add_default_feeds(self):
+        """[summary]
+        """
+
         if self.manager.feeds:
             return
         for url in settings.DEFAULT_FEED_URLS:
@@ -32,6 +44,12 @@ class Controller(object):
             self.manager.add_feed(feed)
 
     def parse_args(self, message):
+        """[summary]
+
+        Arguments:
+            message {[type]} -- [description]
+        """
+
         urls = message.split('\n')
         for url in urls:
             url = url.strip()
@@ -40,33 +58,57 @@ class Controller(object):
             self.add_feed(url)
 
     def enable(self):
+        """[summary]
+        """
+
         self.icon.set_icon('icons/feed.png')
         self.enabled = True
         self.poll()
 
     def disable(self):
+        """[summary]
+        """
+
         self.icon.set_icon('icons/feed_disabled.png')
         self.enabled = False
 
     def save(self):
+        """[summary]
+        """
+
         self.manager.save()
 
     def on_check_for_updates(self):
+        """[summary]
+        """
+
         try:
             self.check_for_updates(False)
         finally:
             wx.CallLater(1000 * 60 * 5, self.on_check_for_updates)
 
     def check_for_updates(self, force=True):
+        """[summary]
+
+        Keyword Arguments:
+            force {bool} -- [description] (default: {True})
+        """
+
         updater.run(self, force)
 
     def on_poll(self):
+        """[summary]
+        """
+
         try:
             self.poll()
         finally:
             wx.CallLater(1000 * 5, self.on_poll)
 
     def poll(self):
+        """[summary]
+        """
+
         if self.polling:
             return
         if not self.enabled:
@@ -80,6 +122,9 @@ class Controller(object):
         util.start_thread(self._poll_thread)
 
     def _poll_thread(self):
+        """[summary]
+        """
+
         found_new = False
         try:
             for new_items in self.manager.poll():
@@ -89,6 +134,12 @@ class Controller(object):
             wx.CallAfter(self._poll_complete, found_new)
 
     def _poll_result(self, new_items):
+        """[summary]
+
+        Arguments:
+            new_items {[type]} -- [description]
+        """
+
         items = self.manager.items
         if self.popup:
             index = self.popup.index
@@ -98,17 +149,33 @@ class Controller(object):
         self.show_items(items, index, False)
 
     def _poll_complete(self, found_new):
+        """[summary]
+
+        Arguments:
+            found_new {[type]} -- [description]
+        """
         if found_new:
             self.save()
         self.polling = False
         self.icon.set_icon('icons/feed.png')
 
     def force_poll(self):
+        """[summary]
+        """
+
         for feed in self.manager.feeds:
             feed.last_poll = 0
         self.poll()
 
     def show_items(self, items, index, focus):
+        """[summary]
+
+        Arguments:
+            items {[type]} -- [description]
+            index {[type]} -- [description]
+            focus {[type]} -- [description]
+        """
+
         play_sound = False
         if not items:
             return
@@ -124,6 +191,9 @@ class Controller(object):
             self.play_sound()
 
     def play_sound(self):
+        """[summary]
+        """
+
         if settings.PLAY_SOUND:
             path = settings.SOUND_PATH
             flags = winsound.SND_FILENAME | winsound.SND_ASYNC
@@ -133,11 +203,19 @@ class Controller(object):
                 pass
 
     def show_popup(self):
+        """[summary]
+        """
         items = self.manager.items
         index = len(items) - 1
         self.show_items(items, index, True)
 
     def add_feed(self, url=''):
+        """[summary]
+
+        Keyword Arguments:
+            url {str} -- [description] (default: {''})
+        """
+
         feed = view.AddFeedDialog.show_wizard(None, url)
         if not feed:
             return
@@ -146,12 +224,18 @@ class Controller(object):
         self.poll()
 
     def edit_settings(self):
+        """[summary]
+        """
+
         window = view.SettingsDialog(None, self)
         window.Center()
         window.ShowModal()
         window.Destroy()
 
     def close(self):
+        """[summary]
+        """
+
         try:
             if self.popup:
                 self.popup.on_close()
