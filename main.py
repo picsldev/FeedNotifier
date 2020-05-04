@@ -1,4 +1,7 @@
 def init_path():
+    """[summary]
+    """
+
     import os
     import dummy
     file = dummy.__file__
@@ -9,6 +12,9 @@ def init_path():
 
 
 def init_logging():
+    """[summary]
+    """
+
     import sys
     import logging
     logging.basicConfig(
@@ -30,6 +36,9 @@ def init_logging():
 
 
 def main():
+    """[summary]
+    """
+
     init_path()
     init_logging()
     import wx
@@ -38,8 +47,8 @@ def main():
     container, message = ipc.init()
     if not container:
         return
-    app = wx.App()  # redirect=True, filename='log.txt')
-    # wx.Log_SetActiveTarget(wx.LogStderr())
+    # app = wx.App()  # redirect=True, filename='log.txt')
+    app = wx.App(redirect=True, filename='log.txt')
     wx.Log.SetActiveTarget(wx.LogStderr())
     ctrl = controller.Controller()
     container.callback = ctrl.parse_args
