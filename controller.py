@@ -5,8 +5,9 @@ import popups
 import view
 import updater
 import util
-# import winsound  # FIXME: incompatible?
 import socket
+# import winsound  # FIXME: incompatible?
+
 from settings import settings
 
 
