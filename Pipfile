@@ -11,14 +11,15 @@ notebook = "*"
 ipython = "*"
 flake8 = "*"
 flake8-mypy = "*"
+mypy-lang = "*"
 
 [packages]
 pygame = "*"
 wxpython = "*"
 feedparser = "*"
-pywin32 = {version = "*", sys_platform = "== 'win32'"}
+pywin32 = {version = "*",sys_platform = "== 'win32'"}
 ply = "*"
-py2exe = "*"
+py2exe = {version = "*",sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.8"
