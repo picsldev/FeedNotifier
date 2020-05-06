@@ -1,3 +1,8 @@
+"""
+docstring
+"""
+
+
 def init_path():
     """[summary]
     """
@@ -54,7 +59,7 @@ def main():
         return
 
     # app = wx.App()  # redirect=True, filename='log.txt')
-    app = wx.App(redirect=True, filename='log.txt')
+    app = wx.App(redirect=True, filename=None, useBestVisual=True)
     wx.Log.SetActiveTarget(wx.LogStderr())
     ctrl = controller.Controller()
     container.callback = ctrl.parse_args
