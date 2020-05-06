@@ -1,6 +1,7 @@
 import sys
 
-if sys.platform == 'win32':
+if sys.platform.startswith('win32'):
+
     from ctypes import *
 
     class LASTINPUTINFO(Structure):
@@ -17,9 +18,25 @@ if sys.platform == 'win32':
             return millis / 1000.0
         else:
             return 0
-else:
+elif sys.platform.startswith('darwin'):
+
+    print('We are in MacOX')  # FIXME: ¿?
+
     def get_idle_duration():
         return 0
+
+elif sys.platform.startswith('linux'):
+
+    print('We are in linux')  # FIXME: ¿?
+
+    def get_idle_duration():
+        return 0
+
+else:
+    pass
+
+    # def get_idle_duration():
+    #    return 0
 
 if __name__ == '__main__':
     import time
