@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 docstring
 """
@@ -13,7 +15,7 @@ def init_path():
     file = os.path.abspath(file)
     while file and not os.path.isdir(file):
         file, ext = os.path.split(file)
-    os.chdir(file)
+    return os.chdir(file)
 
 
 def init_logging():
@@ -49,6 +51,7 @@ def main():
     init_path()
     init_logging()
 
+    import sys
     import wx
     import ipc
     import controller

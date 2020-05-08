@@ -1,3 +1,4 @@
+import sys
 import wx
 import idle
 import feeds
@@ -6,7 +7,9 @@ import view
 import updater
 import util
 import socket
-# import winsound  # FIXME: incompatible?
+
+if sys.platform.startswith('win32'):
+    import winsound
 
 from settings import settings
 

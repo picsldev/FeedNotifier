@@ -20,6 +20,7 @@ feedparser = "*"
 pywin32 = {version = "*",sys_platform = "== 'win32'"}
 ply = "*"
 py2exe = {version = "*",sys_platform = "== 'win32'"}
+winsound = {version = "*",sys_platform = "== 'win32'"}
 
 [requires]
 python_version = "3.8"

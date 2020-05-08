@@ -27,7 +27,7 @@ class CallbackContainer(object):
             wx.CallAfter(self.callback, message)
 
 
-if sys.platform == 'win32':
+if sys.platform.startswith('win32'):
     import time
 
     try:
@@ -119,6 +119,10 @@ if sys.platform == 'win32':
             return True
         except IOError:
             return False
+
+elif sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
+
+    sys.exit('\n\tPlatform not soported\n')
 
 else:
 
