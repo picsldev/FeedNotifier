@@ -16,11 +16,12 @@ import wx
 
 import util
 
-try:
-    import win32file
-    import win32pipe
-except ModuleNotFoundError:
-    sys.exit("\n\tpip install pywin32\n")
+if sys.platform.startswith('win32'):
+    try:
+        import win32file
+        import win32pipe
+    except ModuleNotFoundError:
+        sys.exit("\n\tpip install pywin32 ...\n")
 
 
 class CallbackContainer(object):
