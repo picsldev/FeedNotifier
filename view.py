@@ -2697,4 +2697,7 @@ class AboutPanel(wx.Panel):
         sizer.Add(bitmap, 0, wx.ALIGN_CENTER_HORIZONTAL)
         sizer.AddStretchSpacer(1)
         panel.SetSizerAndFit(sizer)
+
         return panel
+
+# EOF

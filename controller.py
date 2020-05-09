@@ -260,3 +260,5 @@ class Controller(object):
     def on_popup_close(self, event):
         self.popup = None
         self.manager.purge_items(settings.ITEM_CACHE_AGE)
+
+# EOF

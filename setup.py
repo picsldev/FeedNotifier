@@ -69,27 +69,65 @@ sys.argv.append('py2exe')
 
 
 def get_data_files():
+    """[summary]
+    """
+
     def filter_files(files):
+        """[summary]
+        """
+
         def match(file):
+            """[summary]
+
+            Arguments:
+                file {[type]} -- [description]
+
+            Returns:
+                [type] -- [description]
+            """
+
             extensions = ['.dat']
+
             for extension in extensions:
                 if file.endswith(extension):
                     return True
             return False
+
         return tuple(file for file in files if not match(file))
 
     def tree(src):
+        """[summary]
+
+        Arguments:
+            src {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         return [(root, [os.path.join(root, f) for f in filter_files(files)])
                 for (root, dirs, files) in os.walk(os.path.normpath(src))]
 
     def include(src):
+        """[summary]
+
+        Arguments:
+            src {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         result = tree(src)
         result = [('.', item[1]) for item in result]
+
         return result
+
     data_files = []
     data_files += tree('./icons')
     data_files += tree('./sounds')
     data_files += tree('./Microsoft.VC90.CRT')
+
     return data_files
 
 
@@ -124,17 +162,30 @@ setup(
 
 
 def get_revision():
+    """[summary]
+
+    Returns:
+        [type] -- [description]
+    """
+
     #  import time  # FIXME: delete this
     return int(time.time())
 
 
 def save_build_info():
+    """[summary]
+    """
+
     revision = get_revision()
     path = 'dist/revision.txt'
+
     with open(path, 'w') as file:
         file.write(str(revision))
+
     print()
     print(('Saved build revision %d to %s' % (revision, path)))
 
 
 save_build_info()
+
+# EOF

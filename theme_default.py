@@ -17,44 +17,99 @@ BACKGROUND = (230, 230, 230)
 
 
 class Frame(wx.Frame):
+    """[summary]
+
+    Arguments:
+        wx {[type]} -- [description]
+    """
+
     def __init__(self, item, context):
+        """[summary]
+
+        Arguments:
+            item {[type]} -- [description]
+            context {[type]} -- [description]
+        """
+
         title = settings.APP_NAME
         style = wx.FRAME_NO_TASKBAR | wx.BORDER_NONE
+
         if settings.POPUP_STAY_ON_TOP:
             style |= wx.STAY_ON_TOP
+
         super(Frame, self).__init__(None, -1, title, style=style)
+
         self.item = item
         self.context = context
         self.hover_count = 0
+
         container = self.create_container(self)
         container.Bind(wx.EVT_MOUSEWHEEL, self.on_mousewheel)
         container.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
+
         self.container = container
         self.Fit()
 
     def post_link(self, link):
+        """[summary]
+
+        Arguments:
+            link {[type]} -- [description]
+        """
+
         event = popups.Event(self, popups.EVT_LINK)
         event.link = link
         wx.PostEvent(self, event)
 
     def on_link(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.post_link(event.link)
 
     def on_left_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         self.post_link(popups.COMMAND_NEXT)
 
     def on_mousewheel(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         if event.GetWheelRotation() < 0:
             self.post_link(popups.COMMAND_NEXT)
         else:
             self.post_link(popups.COMMAND_PREVIOUS)
 
     def on_focus(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         if event.GetEventObject() != self.container:
             self.container.SetFocusIgnoringChildren()
 
     def on_key_down(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         code = event.GetKeyCode()
+
         if code == wx.WXK_ESCAPE:
             self.post_link(popups.COMMAND_CLOSE)
         elif code == wx.WXK_LEFT:
@@ -67,18 +122,36 @@ class Frame(wx.Frame):
             self.post_link(popups.COMMAND_LAST)
 
     def on_enter(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         event.Skip()
         self.hover_count += 1
         if self.hover_count == 1:
             wx.PostEvent(self, popups.Event(self, popups.EVT_POPUP_ENTER))
 
     def on_leave(self, event):
+        """[summary]
+
+        Arguments:
+            event {[type]} -- [description]
+        """
+
         event.Skip()
         self.hover_count -= 1
         if self.hover_count == 0:
             wx.PostEvent(self, popups.Event(self, popups.EVT_POPUP_LEAVE))
 
     def bind_links(self, widgets):
+        """[summary]
+
+        Arguments:
+            widgets {[type]} -- [description]
+        """
+
         for widget in widgets:
             widget.Bind(controls.EVT_HYPERLINK, self.on_link)
             widget.Bind(wx.EVT_SET_FOCUS, self.on_focus)
@@ -86,6 +159,12 @@ class Frame(wx.Frame):
             widget.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
 
     def bind_widgets(self, widgets):
+        """[summary]
+
+        Arguments:
+            widgets {[type]} -- [description]
+        """
+
         for widget in widgets:
             widget.Bind(wx.EVT_LEFT_DOWN, self.on_left_down)
             widget.Bind(wx.EVT_SET_FOCUS, self.on_focus)
@@ -93,6 +172,15 @@ class Frame(wx.Frame):
             widget.Bind(wx.EVT_LEAVE_WINDOW, self.on_leave)
 
     def create_container(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         color = self.item.feed.color or settings.POPUP_BORDER_COLOR
 
         panel1 = wx.Panel(parent, -1, style=wx.WANTS_CHARS)
@@ -118,9 +206,19 @@ class Frame(wx.Frame):
 
         panel1.Fit()
         self.bind_widgets([panel1, panel2, panel3])
+
         return panel1
 
     def create_contents(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         header = self.create_header(parent)
         body = self.create_body(parent)
         footer = self.create_footer(parent)
@@ -135,16 +233,28 @@ class Frame(wx.Frame):
         sizer.Add(line2, 0, wx.EXPAND)
         sizer.Add(footer, 0, wx.EXPAND)
         self.bind_widgets([line1, line2])
+
         return sizer
 
     def create_header(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         panel.SetBackgroundColour(wx.Colour(*BACKGROUND))
         panel.SetForegroundColour(wx.BLACK)
         feed = self.item.feed
         paths = ['icons/feed.png']
+
         if feed.has_favicon:
             paths.insert(0, feed.favicon_path)
+
         for path in paths:
             try:
                 bitmap = util.scale_bitmap(
@@ -154,6 +264,7 @@ class Frame(wx.Frame):
                 pass
         else:
             bitmap = wx.EmptyBitmap(16, 16)
+
         icon = controls.BitmapLink(panel, feed.link, bitmap)
         icon.SetBackgroundColour(wx.Colour(*BACKGROUND))
         width, height = icon.GetSize()
@@ -168,23 +279,38 @@ class Frame(wx.Frame):
         panel.SetSizer(sizer)
         self.bind_links([icon, button])
         self.bind_widgets([panel])
+
         return panel
 
     def create_feed(self, parent, icon_width):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+            icon_width {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         width = settings.POPUP_WIDTH - 64 - icon_width
+
         if self.item.feed.link:
             link = controls.Link(
                 parent, width, self.item.feed.link, self.item.feed.title)
         else:
             link = controls.Text(parent, width, self.item.feed.title)
+
         link.SetBackgroundColour(wx.Colour(*BACKGROUND))
         font = link.GetFont()
         font.SetWeight(wx.BOLD)
         link.SetFont(font)
+
         if self.item.author:
             info = '%s ago by %s' % (self.item.time_since, self.item.author)
         else:
             info = '%s ago' % self.item.time_since
+
         info = controls.Text(parent, width, info)
         info.SetBackgroundColour(wx.Colour(*BACKGROUND))
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -192,15 +318,27 @@ class Frame(wx.Frame):
         sizer.Add(info, 0, wx.EXPAND)
         self.bind_links([link])
         self.bind_widgets([info])
+
         return sizer
 
     def create_body(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         width = settings.POPUP_WIDTH - 28
+
         if self.item.link:
             link = controls.Link(
                 parent, width, self.item.link, self.item.title)
         else:
             link = controls.Text(parent, width, self.item.title)
+
         link.SetBackgroundColour(wx.WHITE)
         font = link.GetFont()
         font.SetWeight(wx.BOLD)
@@ -219,9 +357,19 @@ class Frame(wx.Frame):
         sizer.AddSpacer(10)
         self.bind_links([link])
         self.bind_widgets([text])
+
         return sizer
 
     def create_footer(self, parent):
+        """[summary]
+
+        Arguments:
+            parent {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
         panel = wx.Panel(parent, -1)
         panel.SetBackgroundColour(wx.Colour(*BACKGROUND))
         panel.SetForegroundColour(wx.BLACK)
@@ -264,11 +412,14 @@ class Frame(wx.Frame):
         sizer.AddSpacer(10)
         panel.SetSizer(sizer)
         self.bind_widgets([panel, text])
+
         return panel
 
 
 if __name__ == '__main__':
-    app = wx.PySimpleApp()
-    frame = Frame()
+    app = wx.App()
+    frame = wx.Frame(None, -1, "Test")
     frame.Show()
     app.MainLoop()
+
+# EOF

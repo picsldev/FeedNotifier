@@ -75,7 +75,8 @@ def main():
     print('main:: -> ipc.init() - Out')  # FIXME: delete this
 
     if not container:
-        print('main:: The container could not be created.')  # FIXME: delete this
+        # FIXME: delete this
+        print('main:: The container could not be created.')
         return
 
     app = wx.App()  # redirect=True, filename='log.txt')
