@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 # Keyword Filter Parser
 
 EXCLUDE = 0

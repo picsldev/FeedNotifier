@@ -1,8 +1,17 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
 import wx
 import wx.adv
-import util
+
 import feeds
 import filters
+import util
 from settings import settings
 
 INDEX_ENABLED = 0

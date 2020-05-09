@@ -6,9 +6,21 @@ Returns:
     [type] -- [description]
 """
 
-import wx
+import functools
+import socket
+import socketserver
 import sys
+import time
+
+import wx
+
 import util
+
+try:
+    import win32file
+    import win32pipe
+except ModuleNotFoundError:
+    sys.exit("\n\tpip install pywin32\n")
 
 
 class CallbackContainer(object):
@@ -27,7 +39,8 @@ class CallbackContainer(object):
     def __call__(self, message):
         """Making GUI method calls from non-GUI threads.
 
-        Any extra positional or keyword args are passed on to the callable when it is called.
+        Any extra positional or keyword args are passed on to the callable
+        when it is called.
 
         Arguments:
             message {[type]} -- [description]
@@ -38,14 +51,6 @@ class CallbackContainer(object):
 
 
 if sys.platform.startswith('win32'):
-
-    import time
-
-    try:
-        import win32file
-        import win32pipe
-    except ModuleNotFoundError:
-        sys.exit("\n\tpip install pywin32\n")
 
     def init():
         """initialize the thread server
@@ -145,9 +150,9 @@ elif sys.platform.startswith('linux'):
 
 else:
 
-    import functools
-    import socket
-    import socketserver
+    # import functools      # FIXME: delete this
+    # import socket         # FIXME: delete this
+    # import socketserver   # FIXME: delete this
 
     def init():
         """[summary]
@@ -220,3 +225,5 @@ else:
         sock.connect((host, port))
         sock.send(message)
         sock.close()
+
+# EOF

@@ -1,5 +1,15 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 import wx
 import wx.lib.wordwrap as wordwrap
+
 import util
 
 

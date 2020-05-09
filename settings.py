@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
+import defaults
 import safe_pickle
 
 
@@ -238,7 +248,7 @@ def create_chain():
         [type] -- [description]
     """
 
-    import defaults
+    # import defaults  # FIXME: delete this
 
     settings = ModuleSettings(None, defaults)
     settings = FileSettings(settings, 'settings.dat')

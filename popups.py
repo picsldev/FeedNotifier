@@ -1,5 +1,17 @@
-import wx
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 import webbrowser
+
+import wx
+
+import theme_default
 from settings import settings
 
 BLANK = 'about:blank'
@@ -82,7 +94,7 @@ class PopupManager(wx.EvtHandler):
             indexes.add(self.index - 1)
             indexes.add(self.index + 1)
             # indexes.add(0)
-            #indexes.add(self.count - 1)
+            # indexes.add(self.count - 1)
         items = set(self.items[index]
                     for index in indexes if index >= 0 and index < self.count)
         for item in items:
@@ -123,7 +135,7 @@ class PopupManager(wx.EvtHandler):
 
     def create_frame(self, item):
         if True:  # settings.POPUP_THEME == 'default':
-            import theme_default
+            # import theme_default  # FIXME: delete this
             context = self.create_context(item)
             frame = theme_default.Frame(item, context)
             frame.Bind(EVT_LINK, self.on_link)

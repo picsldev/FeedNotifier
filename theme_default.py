@@ -1,4 +1,13 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
 import wx
+
 import controls
 import popups
 import util

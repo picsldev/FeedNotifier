@@ -1,16 +1,25 @@
-import os
-import time
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 import calendar
-import uuid
-import urllib.parse
-import urllib.request
+import logging
+import os
+import queue
+import time
 import urllib.error
 import urllib.parse
+import urllib.request
+import uuid
+
 import filters
-import util
-import queue
-import logging
 import safe_pickle
+import util
 from settings import settings
 
 

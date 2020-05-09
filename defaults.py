@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 # Helper Functions
 def load_revision():
     try:

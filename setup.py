@@ -1,7 +1,20 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+
 import os
-import py2exe
 import sys
+import time
 from distutils.core import setup
+
+if sys.platform.startswith('win32'):
+    import py2exe
+
 
 manifest = '''
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1"
@@ -66,7 +79,8 @@ def get_data_files():
         return tuple(file for file in files if not match(file))
 
     def tree(src):
-        return [(root, [os.path.join(root, f) for f in filter_files(files)]) for (root, dirs, files) in os.walk(os.path.normpath(src))]
+        return [(root, [os.path.join(root, f) for f in filter_files(files)])
+                for (root, dirs, files) in os.walk(os.path.normpath(src))]
 
     def include(src):
         result = tree(src)
@@ -110,7 +124,7 @@ setup(
 
 
 def get_revision():
-    import time
+    #  import time  # FIXME: delete this
     return int(time.time())
 
 

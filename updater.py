@@ -1,10 +1,20 @@
-import wx
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
 import os
-import time
-import urllib.request
-import urllib.parse
-import urllib.error
 import tempfile
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+
+import wx
+
 import util
 from settings import settings
 

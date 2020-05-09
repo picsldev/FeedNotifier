@@ -1,17 +1,26 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
+import socket
 import sys
+
 import wx
-import idle
+
 import feeds
+import idle
 import popups
-import view
 import updater
 import util
-import socket
+import view
+from settings import settings
 
 if sys.platform.startswith('win32'):
     import winsound
-
-from settings import settings
 
 
 class Controller(object):
@@ -117,7 +126,8 @@ class Controller(object):
             return
         if not self.enabled:
             return
-        if settings.DISABLE_WHEN_IDLE and idle.get_idle_duration() > settings.USER_IDLE_TIMEOUT:
+        if settings.DISABLE_WHEN_IDLE and idle.get_idle_duration() > \
+           settings.USER_IDLE_TIMEOUT:
             return
         if not self.manager.should_poll():
             return
