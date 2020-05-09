@@ -13,8 +13,10 @@ def init_path():
     import dummy
     file = dummy.__file__
     file = os.path.abspath(file)
+
     while file and not os.path.isdir(file):
         file, ext = os.path.split(file)
+
     return os.chdir(file)
 
 
