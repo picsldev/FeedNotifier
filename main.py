@@ -4,18 +4,32 @@
 docstring
 """
 
+import logging
+import os
+import sys
+
+try:
+    import wx
+except ImportError:
+    sys.exit('\n\tInstall wxPython.\n')
+
+import controller
+import dummy
+import ipc
+
 
 def init_path():
     """[summary]
     """
 
-    import os
-    import dummy
+    # import os
+    # import dummy
     file = dummy.__file__
     file = os.path.abspath(file)
 
     while file and not os.path.isdir(file):
-        file, ext = os.path.split(file)
+        # file, ext = os.path.split(file)
+        file = os.path.split(file[0])
 
     return os.chdir(file)
 
@@ -24,8 +38,8 @@ def init_logging():
     """[summary]
     """
 
-    import sys
-    import logging
+    # import sys
+    # import logging
 
     logging.basicConfig(
         level=logging.DEBUG,
@@ -53,18 +67,18 @@ def main():
     init_path()
     init_logging()
 
-    import sys
-    import wx
-    import ipc
-    import controller
+    # import sys
+    # import wx
+    # import ipc
+    # import controller
 
     container, message = ipc.init()
 
     if not container:
         return
 
-    # app = wx.App()  # redirect=True, filename='log.txt')
-    app = wx.App(redirect=True, filename=None, useBestVisual=True)
+    app = wx.App()  # redirect=True, filename='log.txt')
+    # app = wx.App(redirect=True, filename=None, useBestVisual=True)
     wx.Log.SetActiveTarget(wx.LogStderr())
     ctrl = controller.Controller()
     container.callback = ctrl.parse_args
