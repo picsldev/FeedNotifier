@@ -120,9 +120,13 @@ if sys.platform.startswith('win32'):
         except IOError:
             return False
 
-elif sys.platform.startswith('darwin') or sys.platform.startswith('linux'):
+elif sys.platform.startswith('darwin'):
 
-    sys.exit('\n\tPlatform not soported\n')
+    sys.exit('\n\tdarwin platform not soported\n')
+
+elif sys.platform.startswith('linux'):
+
+    sys.exit('\n\tlinux in not suported at time...\n')
 
 else:
 
