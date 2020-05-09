@@ -19,26 +19,22 @@ import ipc
 
 
 def init_path():
-    """[summary]
+    """Set the current directory.
     """
 
-    # import os
-    # import dummy
     file = dummy.__file__
     file = os.path.abspath(file)
 
     while file and not os.path.isdir(file):
-        # file, ext = os.path.split(file)
-        file = os.path.split(file[0])
-
-    return os.chdir(file)
+        file = os.path.split(file)[0]
+        os.chdir(file)
 
 
 def init_logging():
     """[summary]
     """
 
-    # import sys
+    # import sys  # FIXME: delete this import
     # import logging
 
     logging.basicConfig(
@@ -61,20 +57,25 @@ def init_logging():
 
 
 def main():
-    """[summary]
+    """Start point of app.
     """
 
     init_path()
     init_logging()
 
-    # import sys
+    # import sys  # FIXME: delete this import
     # import wx
     # import ipc
     # import controller
 
+    print('main:: -> ipc.init() - In')  # FIXME: delete this
     container, message = ipc.init()
+    print('container: %s' % container)  # FIXME: delete this
+    print('message: %s' % message)  # FIXME: delete this
+    print('main:: -> ipc.init() - Out')  # FIXME: delete this
 
     if not container:
+        print('main:: The container could not be created.')  # FIXME: delete this
         return
 
     app = wx.App()  # redirect=True, filename='log.txt')
@@ -88,3 +89,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# EOF

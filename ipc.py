@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""[summary]
+
+Returns:
+    [type] -- [description]
+"""
+
 import wx
 import sys
 import util
@@ -17,7 +25,9 @@ class CallbackContainer(object):
         self.callback = None
 
     def __call__(self, message):
-        """[summary]
+        """Making GUI method calls from non-GUI threads.
+
+        Any extra positional or keyword args are passed on to the callable when it is called.
 
         Arguments:
             message {[type]} -- [description]
@@ -28,6 +38,7 @@ class CallbackContainer(object):
 
 
 if sys.platform.startswith('win32'):
+
     import time
 
     try:
@@ -37,7 +48,7 @@ if sys.platform.startswith('win32'):
         sys.exit("\n\tpip install pywin32\n")
 
     def init():
-        """[summary]
+        """initialize the thread server
 
         Returns:
             [type] -- [description]
@@ -48,9 +59,13 @@ if sys.platform.startswith('win32'):
         name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
 
         if client(name, message):
+            print('ipc::init:win32 - Existen "message" y "name"')  # FIXME: delete this
             return None, message
         else:
+            print('ipc::init:win32 - No existen "message" y "name"')  # FIXME: delete this
+            # jump to util.py
             util.start_thread(server, name, container)
+
             return container, message
 
     def server(name, callback_func):
