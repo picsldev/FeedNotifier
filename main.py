@@ -4,18 +4,27 @@
 docstring
 """
 
+import gettext
 import logging
 import os
 import sys
 
-try:
-    import wx
-except ImportError:
-    sys.exit('\n\tInstall wxPython.\n')
-
 import controller
 import dummy
 import ipc
+
+try:
+    import wx
+    import wx.Locale
+    import wx.GetTranslation
+except ImportError:
+    sys.exit('\n\tInstall wxPython.\n')
+
+
+languagelist = [locale.getdefaultlocale()[0], 'en_US']
+t = gettext.translation('FeedNotifier', localedir, ['es_ES', 'en_US'])
+_ = t.ugettext
+# pygettext -d FeedNotifier main.py
 
 
 def init_path():
