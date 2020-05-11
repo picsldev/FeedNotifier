@@ -15,16 +15,16 @@ import ipc
 
 try:
     import wx
-    import wx.Locale
-    import wx.GetTranslation
+    # import wx.Locale
+    # import wx.GetTranslation
 except ImportError:
     sys.exit('\n\tInstall wxPython.\n')
 
 
-languagelist = [locale.getdefaultlocale()[0], 'en_US']
-t = gettext.translation('FeedNotifier', localedir, ['es_ES', 'en_US'])
-_ = t.ugettext
-# pygettext -d FeedNotifier main.py
+# languagelist = [locale.getdefaultlocale()[0], 'en_US']
+# t = gettext.translation('FeedNotifier', localedir, ['es_ES', 'en_US'])
+# _ = t.ugettext
+# # pygettext -d FeedNotifier main.py
 
 
 def init_path():
@@ -88,8 +88,8 @@ def main():
         print('main:: The container could not be created.')
         return
 
-    app = wx.App()  # redirect=True, filename='log.txt')
-    # app = wx.App(redirect=True, filename=None, useBestVisual=True)
+    # app = wx.App()  # redirect=True, filename='log.txt')
+    app = wx.App(redirect=True, filename="log.txt", useBestVisual=True)
     wx.Log.SetActiveTarget(wx.LogStderr())
     ctrl = controller.Controller()
     container.callback = ctrl.parse_args
