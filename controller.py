@@ -6,6 +6,7 @@ Returns:
     [type] -- [description]
 """
 
+import logging
 import socket
 import sys
 
@@ -34,6 +35,7 @@ class Controller(object):
         """[summary]
         """
 
+        logging.debug(f'Initializing Controller class')
         socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
         self.icon = view.TaskBarIcon(self)
         self.manager = feeds.FeedManager()
@@ -44,6 +46,7 @@ class Controller(object):
         self.enabled = True
         self.on_poll()
         self.on_check_for_updates()
+        logging.debug(f'Initialized Controller class')
 
     def add_default_feeds(self):
         """[summary]

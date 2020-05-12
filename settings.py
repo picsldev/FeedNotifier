@@ -8,6 +8,7 @@ Returns:
 
 
 import defaults
+import logging
 import safe_pickle
 
 
@@ -18,7 +19,9 @@ class InvalidSettingError(Exception):
         Exception {[type]} -- [description]
     """
 
+    logging.debug(f'Initializing class InvalidSettingError()')
     pass
+    logging.debug(f'Initialized class InvalidSettingError()')
 
 
 class NOT_SET(object):
@@ -28,7 +31,9 @@ class NOT_SET(object):
         object {[type]} -- [description]
     """
 
+    logging.debug(f'Initializing class NOT_SET()')
     pass
+    logging.debug(f'Initialized class NOT_SET()')
 
 
 class Settings(object):

@@ -51,7 +51,7 @@ class CallbackContainer(object):
 
         if self.callback:
             wx.CallAfter(self.callback, message)
-        
+
         logging.debug("Launch wx.CallAfter(self.callback, message)")
 
 
@@ -64,18 +64,21 @@ if sys.platform.startswith('win32'):
             [type] -- [description]
         """
 
+        logging.debug('initializing')
+
         container = CallbackContainer()
         message = '\n'.join(sys.argv[1:])
         name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
 
         if client(name, message):
-            logging.debug("return message='%s' and name='%s'", message, name)
+            logging.debug("Initialized: return message='%s' and name='%s'", message, name)
             return None, message
         else:
-            logging.debug("message='%s' and name='%s'", message, name)
+            logging.debug("Initialized: message='%s' and name='%s'", message, name)
 
-            # jump to util.py
+            logging.debug('Jump to util::start_thread()')
             util.start_thread(server, name, container)
+            logging.debug('return of util::start_thread()')
 
             return container, message
 

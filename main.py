@@ -105,23 +105,29 @@ def main():
     try:
         container, message = ipc.init()
     except TypeError:
-        logging.critical('IPC no initialize!\nExit.')
+        logging.error('IPC no initialize!\nExit.')
         sys.exit('Problems! IPC no initialize')
-    logging.debug('container: %s', container)  # FIXME: delete this
-    logging.debug('message: %s', message)  # FIXME: delete this
-    logging.debug('<- ipc.init() - Out')  # FIXME: delete this
+    logging.debug(f'container: {container}')
+    logging.debug(f'message: {message}')
+    logging.debug('<- ipc.init() - Out')
 
     if not container:
-        # FIXME: delete this
-        logging.debug('main:: The container could not be created.')
+        logging.error('main:: The container could not be created.')
         return
+
+    logging.debug(f'Initializing wx.app()')
 
     # app = wx.App()  # redirect=True, filename='log.txt')
     app = wx.App(redirect=True, filename="log.txt", useBestVisual=True)
+    logging.debug(f'Initializing wx.app()')
     wx.Log.SetActiveTarget(wx.LogStderr())
+    logging.debug(f'Initializing wx.Log.SetActiveTarget(wx.LogStderr())')
     ctrl = controller.Controller()
+    logging.debug(f'Initializing ctrl with controller.Controller()')
     container.callback = ctrl.parse_args
+    logging.debug(f'Initializing container.callback with ctrl.parse_args')
     container(message)
+    logging.debug(f'Initializing container(message)')
     app.MainLoop()
 
 

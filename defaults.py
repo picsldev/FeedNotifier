@@ -6,13 +6,17 @@ Returns:
     [type] -- [description]
 """
 
+import logging
+
 
 # Helper Functions
 def load_revision():
     try:
         with open('revision.txt', 'r') as file:
+            logging.info(f'Reading the file revision.txt.')
             return int(file.read().strip())
     except Exception:
+        logging.error(f'The file revision.txt does not exist.')
         return -1
 
 

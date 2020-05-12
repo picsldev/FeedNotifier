@@ -12,6 +12,7 @@ import re
 import time
 import base64
 import calendar
+import logging
 import urllib.request
 import urllib.error
 import urllib.parse
@@ -52,11 +53,13 @@ def start_thread(func, *args):
         [type] -- [description]
     """
 
-    print('util::start_thread - In')  # Fixme: delete this
+    logging.debug('util::start_thread - In')
+    logging.debug(f'func: {func}')
+    logging.debug(f'args: {args}')
     thread = threading.Thread(target=func, args=args)
     thread.setDaemon(True)
     thread.start()
-    print('util::start_thread - Out')  # Fixme: delete this
+    logging.debug('util::start_thread - Out')
     return thread
 
 
