@@ -4,7 +4,7 @@
 docstring
 """
 
-import gettext
+# import gettext
 import logging
 import os
 import sys
@@ -20,6 +20,11 @@ try:
 except ImportError:
     sys.exit('\n\tInstall wxPython.\n')
 
+
+APPNAME = os.path.splitext(os.path.basename(sys.argv[0]))[0]
+INI_FILENAME = APPNAME + '.ini'
+LOG_FILENAME = APPNAME + '.log'
+LOG_LEVEL = logging.DEBUG  #: Example: "DEBUG" o "WARNING"
 
 # languagelist = [locale.getdefaultlocale()[0], 'en_US']
 # t = gettext.translation('FeedNotifier', localedir, ['es_ES', 'en_US'])
@@ -46,23 +51,42 @@ def init_logging():
     # import sys  # FIXME: delete this import
     # import logging
 
-    logging.basicConfig(
-        level=logging.DEBUG,
-        filename='log.txt',
-        filemode='w',
-        format='%(asctime)s %(levelname)s %(message)s',
-        datefmt='%H:%M:%S',
-    )
+    mformat = "%(asctime)s" \
+              " %(levelname)s %(module)s:%(lineno)s %(funcName)s %(message)s"
 
-    if not hasattr(sys, 'frozen'):
-        console = logging.StreamHandler(sys.stdout)
-        console.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(
-            '%(asctime)s %(levelname)s %(message)s',
-            '%H:%M:%S',
-        )
-        console.setFormatter(formatter)
-        logging.getLogger('').addHandler(console)
+    logging.basicConfig(format=mformat,
+                        datefmt='%Y%m%d%H%M%S',
+                        filename=LOG_FILENAME,
+                        level=LOG_LEVEL,
+                        # style="{"
+                        )
+
+    logging.logThreads = 0
+    logging.logProcesses = 0
+
+    # logging.basicConfig(
+    #    level=LOG_LEVEL,
+    #    filename=LOG_FILENAME,
+    #    filemode='w',
+    #    format='%(asctime)s %(levelname)s %(message)s',
+    #    datefmt='%H:%M:%S',
+    # )
+
+    # if not hasattr(sys, 'frozen'):
+    #    console = logging.StreamHandler(sys.stdout)
+    #    console.setLevel(logging.DEBUG)
+    #    formatter = logging.Formatter(
+    #        '%(asctime)s %(levelname)s %(message)s',
+    #        '%H:%M:%S',
+    #    )
+    #    console.setFormatter(formatter)
+    #    logging.getLogger('').addHandler(console)
+
+    # logging.debug('Test DEBUG')  # DEBUG    10
+    # logging.info('Test INFO')  # INFO   20
+    # logging.warning('Test WARNING')  # WARNING  30
+    # logging.error('Test ERROR')  # ERROR    40
+    # logging.critical('Test CRITICAL')  # CRITICAL   50
 
 
 def main():
@@ -77,15 +101,19 @@ def main():
     # import ipc
     # import controller
 
-    print('main:: -> ipc.init() - In')  # FIXME: delete this
-    container, message = ipc.init()
-    print('container: %s' % container)  # FIXME: delete this
-    print('message: %s' % message)  # FIXME: delete this
-    print('main:: -> ipc.init() - Out')  # FIXME: delete this
+    logging.debug('-> ipc.init() - In')  # FIXME: delete this
+    try:
+        container, message = ipc.init()
+    except TypeError:
+        logging.critical('IPC no initialize!\nExit.')
+        sys.exit('Problems! IPC no initialize')
+    logging.debug('container: %s', container)  # FIXME: delete this
+    logging.debug('message: %s', message)  # FIXME: delete this
+    logging.debug('<- ipc.init() - Out')  # FIXME: delete this
 
     if not container:
         # FIXME: delete this
-        print('main:: The container could not be created.')
+        logging.debug('main:: The container could not be created.')
         return
 
     # app = wx.App()  # redirect=True, filename='log.txt')

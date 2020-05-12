@@ -7,6 +7,7 @@ Returns:
 """
 
 import functools
+import logging
 import socket
 import socketserver
 import sys
@@ -32,10 +33,11 @@ class CallbackContainer(object):
     """
 
     def __init__(self):
-        """[summary]
+        """Initialize CallbackContainer class.
         """
 
         self.callback = None
+        logging.debug("Return callback=%s", self.callback)
 
     def __call__(self, message):
         """Making GUI method calls from non-GUI threads.
@@ -49,6 +51,8 @@ class CallbackContainer(object):
 
         if self.callback:
             wx.CallAfter(self.callback, message)
+        
+        logging.debug("Launch wx.CallAfter(self.callback, message)")
 
 
 if sys.platform.startswith('win32'):
@@ -65,10 +69,11 @@ if sys.platform.startswith('win32'):
         name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
 
         if client(name, message):
-            print('ipc::init:win32 - Existen "message" y "name"')  # FIXME: delete this
+            logging.debug("return message='%s' and name='%s'", message, name)
             return None, message
         else:
-            print('ipc::init:win32 - No existen "message" y "name"')  # FIXME: delete this
+            logging.debug("message='%s' and name='%s'", message, name)
+
             # jump to util.py
             util.start_thread(server, name, container)
 
@@ -147,7 +152,105 @@ elif sys.platform.startswith('darwin'):
 
 elif sys.platform.startswith('linux'):
 
-    sys.exit('\n\tlinux in not suported at time...\n')
+    # sys.exit('\n\tlinux in not suported at time...\n')
+
+    def init():
+        """initialize the thread server
+
+        Returns:
+            [type] -- [description]
+        """
+
+        print('Entramos en ipc::init()::linux')  # FIXME: delete this
+
+        container = CallbackContainer()
+        print(f"Container: {container}")
+        print(f"Container: {type(container)}")
+        print(f"Container: {container.__doc__}")
+        # message = '\n'.join(sys.argv[1:])
+        # name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
+
+        # if client(name, message):
+        #    print('ipc::init:win32 - Existen "message" y "name"')
+        #    print('Salimos de ipc::init()::linux')
+        #    return None, message
+        # else:
+        #    print('ipc::init:win32 - No existen "message" y "name"')
+        #    print('Salimos de ipc::init()::linux')
+        #    # jump to util.py
+        #    util.start_thread(server, name, container)
+        #
+        #    return container, message
+
+        print('Salimos de ipc::init()::linux')  # FIXME: delete this
+
+    def server(name, callback_func):
+        """[summary]
+
+        Arguments:
+            name {[type]} -- [description]
+            callback_func {[type]} -- [description]
+        """
+
+        buffer = 4096
+        timeout = 1000
+        error = False
+
+        while True:
+            if error:
+                time.sleep(1)
+                error = False
+
+            handle = win32pipe.CreateNamedPipe(
+                name,
+                win32pipe.PIPE_ACCESS_INBOUND,
+                win32pipe.PIPE_TYPE_BYTE |
+                win32pipe.PIPE_READMODE_BYTE |
+                win32pipe.PIPE_WAIT,
+                win32pipe.PIPE_UNLIMITED_INSTANCES,
+                buffer,
+                buffer,
+                timeout,
+                None)
+
+            if handle == win32file.INVALID_HANDLE_VALUE:
+                error = True
+                continue
+
+            try:
+                if win32pipe.ConnectNamedPipe(handle) != 0:
+                    error = True
+                else:
+                    code, message = win32file.ReadFile(handle, buffer, None)
+                    if code == 0:
+                        callback_func(message)
+                    else:
+                        error = True
+            except Exception:
+                error = True
+            finally:
+                win32pipe.DisconnectNamedPipe(handle)
+                win32file.CloseHandle(handle)
+
+    def client(name, message):
+        """[summary]
+
+        Arguments:
+            name {[type]} -- [description]
+            message {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        """
+
+        try:
+            file = open(name, 'wb')
+            file.write(message)
+            file.close()
+            return True
+        except IOError:
+            return False
+
 
 else:
 
