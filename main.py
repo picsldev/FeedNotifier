@@ -4,6 +4,7 @@
 docstring
 """
 
+# import pdb; pdb.set_trace()
 # import gettext
 import logging
 import os
@@ -115,11 +116,11 @@ def main():
         logging.error('main:: The container could not be created.')
         return
 
-    logging.debug(f'Initializing wx.app()')
+    logging.debug(f'Initializing wx.app class')
 
     # app = wx.App()  # redirect=True, filename='log.txt')
     app = wx.App(redirect=True, filename="log.txt", useBestVisual=True)
-    logging.debug(f'Initializing wx.app()')
+    logging.debug(f'Initialized wx.app class')
     wx.Log.SetActiveTarget(wx.LogStderr())
     logging.debug(f'Initializing wx.Log.SetActiveTarget(wx.LogStderr())')
     ctrl = controller.Controller()
