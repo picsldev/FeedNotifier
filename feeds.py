@@ -381,12 +381,16 @@ class FeedManager(object):
     """
 
     def __init__(self):
-        """[summary]
+        """Initializing FeedManager class
         """
+
+        logging.debug(f'Initializing FeedManager class')
 
         self.feeds = []
         self.items = []
         self.filters = []
+
+        logging.debug(f'Initialized FeedManager class')
 
     def add_feed(self, feed):
         """[summary]
@@ -396,6 +400,7 @@ class FeedManager(object):
         """
 
         logging.info('Adding feed "%s"' % feed.url)
+
         self.feeds.append(feed)
 
     def remove_feed(self, feed):
@@ -406,6 +411,7 @@ class FeedManager(object):
         """
 
         logging.info('Removing feed "%s"' % feed.url)
+
         self.feeds.remove(feed)
 
         for filter in self.filters:
@@ -418,7 +424,8 @@ class FeedManager(object):
             filter {[type]} -- [description]
         """
 
-        logging.info('Adding filter "%s"' % filter.code)
+        logging.info('Adding new filter "%s"' % filter.code)
+
         self.filters.append(filter)
 
     def remove_filter(self, filter):
@@ -429,6 +436,7 @@ class FeedManager(object):
         """
 
         logging.info('Removing filter "%s"' % filter.code)
+
         self.filters.remove(filter)
 
     def should_poll(self):
@@ -437,6 +445,8 @@ class FeedManager(object):
         Returns:
             [type] -- [description]
         """
+
+        logging.info(f'Should poll each feed')
 
         return any(feed.should_poll() for feed in self.feeds)
 
@@ -447,6 +457,7 @@ class FeedManager(object):
             [type] -- [description]
         """
 
+        logging.debug(f'')
         now = int(time.time())
         jobs = queue.Queue()
         results = queue.Queue()
