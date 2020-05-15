@@ -6,25 +6,28 @@ Returns:
     [type] -- [description]
 """
 
-import wx
-import os
-import re
-import time
 import base64
 import calendar
 import logging
-import urllib.request
+import os
+import re
+import sys
+import threading
+import time
 import urllib.error
 import urllib.parse
-import urllib.parse
-import threading
+import urllib.request
+from html.entities import name2codepoint
+
+import wx
+
+from settings import settings
+
 try:
     import feedparser
 except ModuleNotFoundError:
     sys.exit("\n\tpip install feeparser\n")
 
-from html.entities import name2codepoint
-from settings import settings
 
 
 def set_icon(window):
@@ -34,6 +37,8 @@ def set_icon(window):
         window {[type]} -- [description]
     """
 
+    logging.debug(f'initializing set_icon function.')
+
     bundle = wx.IconBundle()
     bundle.AddIcon(wx.Icon('icons/16.png', wx.BITMAP_TYPE_PNG))
     bundle.AddIcon(wx.Icon('icons/24.png', wx.BITMAP_TYPE_PNG))
@@ -41,6 +46,8 @@ def set_icon(window):
     bundle.AddIcon(wx.Icon('icons/48.png', wx.BITMAP_TYPE_PNG))
     bundle.AddIcon(wx.Icon('icons/256.png', wx.BITMAP_TYPE_PNG))
     window.SetIcons(bundle)
+
+    logging.debug(f'initialized set_icon function.')
 
 
 def start_thread(func, *args):
@@ -523,12 +530,15 @@ def format(text, max_length=400):
     """
 
     previous = ''
+
     while text != previous:
         previous = text
         text = replace_entities1(text)
         text = replace_entities2(text)
+
     text = remove_markup(text)
     text = ' '.join(text.split())
+
     if len(text) > max_length:
         text = text[:max_length].strip()
         text = text.split()[:-1]
