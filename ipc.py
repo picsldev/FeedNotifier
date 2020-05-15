@@ -164,14 +164,14 @@ elif sys.platform.startswith('linux'):
             [type] -- [description]
         """
 
-        print('Entramos en ipc::init()::linux')  # FIXME: delete this
+        logging.debug(f'Initializing ipc')
 
         container = CallbackContainer()
-        print(f"Container: {container}")
-        print(f"Container: {type(container)}")
-        print(f"Container: {container.__doc__}")
-        # message = '\n'.join(sys.argv[1:])
-        # name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
+        # print(f"Container: {container}")  # FIXME: delete this
+        # print(f"Container: {type(container)}")  # FIXME: delete this
+        # print(f"Container: {container.__doc__}")  # FIXME: delete this
+        message = '\n'.join(sys.argv[1:])
+        name = r'\\.\pipe\FeedNotifier_%s' % wx.GetUserId()
 
         # if client(name, message):
         #    print('ipc::init:win32 - Existen "message" y "name"')
@@ -185,7 +185,7 @@ elif sys.platform.startswith('linux'):
         #
         #    return container, message
 
-        print('Salimos de ipc::init()::linux')  # FIXME: delete this
+        logging.debug(f'Initialized ipc')
 
     def server(name, callback_func):
         """[summary]
