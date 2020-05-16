@@ -10,7 +10,10 @@ import logging
 import socket
 import sys
 
-import wx
+try:
+    import wx
+except ModuleNotFoundError:
+    sys.exit('\n\timport wx\n')
 
 import feeds
 import idle

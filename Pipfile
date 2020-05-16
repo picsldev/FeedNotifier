@@ -14,16 +14,16 @@ flake8-mypy = "*"
 mypy-lang = "*"
 isort = "*"
 winpdb-reborn = "==2.0.0.dev5"
+ipdb = "*"
+pycallgraph = "*"
 
 [packages]
 pygame = "*"
 wxpython = "*"
 feedparser = "*"
-pywin32 = {version = "*",sys_platform = "== 'win32'"}
 ply = "*"
+pywin32 = {version = "*",sys_platform = "== 'win32'"}
 py2exe = {version = "*",sys_platform = "== 'win32'"}
 # winsound = {version = "*",sys_platform = "== 'win32'"}
-winpdb-reborn = "*"
-
-[requires]
-python_version = "3.8"
+#[requires]
+#python_version = "3.8"
