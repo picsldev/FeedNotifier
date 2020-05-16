@@ -8,6 +8,7 @@ settings.dat
 __pycache__
 .vscode
 .mypy_cache
+.venv
 
 parser.out
 parsetab.py
