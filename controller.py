@@ -38,7 +38,7 @@ class Controller(object):
         """[summary]
         """
 
-        logging.debug('Initializing Controller class')
+        print('Initializing Controller class')  # FIXME: Delete this
 
         socket.setdefaulttimeout(settings.SOCKET_TIMEOUT)
         self.icon = view.TaskBarIcon(self)
@@ -51,7 +51,7 @@ class Controller(object):
         self.on_poll()
         self.on_check_for_updates()
 
-        logging.debug('Initialized Controller class')
+        print('Initialized Controller class')  # FIXME: Delete this
 
     def add_default_feeds(self):
         """[summary]
