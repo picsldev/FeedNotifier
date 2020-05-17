@@ -17,6 +17,7 @@ winpdb-reborn = "==2.0.0.dev5"
 ipdb = "*"
 pycallgraph = "*"
 psutil = "*"
+pudb = "*"
 
 [packages]
 pygame = "*"
