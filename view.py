@@ -42,6 +42,7 @@ class TaskBarIcon(wx.adv.TaskBarIcon):
         """
 
         super(TaskBarIcon, self).__init__()
+
         self.controller = controller
         self.set_icon('icons/feed.png')
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
