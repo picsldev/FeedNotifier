@@ -12,6 +12,7 @@ import webbrowser
 import wx
 
 import theme_default
+
 from settings import settings
 
 BLANK = 'about:blank'

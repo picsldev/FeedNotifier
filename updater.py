@@ -16,6 +16,7 @@ import urllib.request
 import wx
 
 import util
+
 from settings import settings
 
 
